@@ -1,0 +1,12 @@
+ADML Integrated Antimatter Dimensions
+
+This playable build incorporates Antimatter Dimensions source code by IvarK.
+The original source is available at:
+https://github.com/IvarK/AntimatterDimensionsSourceCode
+
+The original source is distributed under the MIT License. See LICENSE.
+ADML is an integrated loader layer added to the game build.
+
+This package also bundles JSZip 3.10.1 for local ZIP plugin inspection.
+JSZip is distributed under the MIT License:
+https://github.com/Stuk/jszip
