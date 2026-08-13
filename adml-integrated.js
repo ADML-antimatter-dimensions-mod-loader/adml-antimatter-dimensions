@@ -293,26 +293,16 @@ class IntegratedADML {
 
   async installGithubRepo(fullName) {
     try {
-      this.toast(`Resolving default branch and fetching ${fullName}...`);
+      this.toast(`Downloading ${fullName} (Self-responsibility direct archive)...`);
       
-      // Step 1: Fetch repository metadata to discover default branch (e.g. main or master)
-      let defaultBranch = "main";
-      try {
-        const repoRes = await fetch(`https://api.github.com/repos/${fullName}`, { headers: { Accept: "application/vnd.github+json" } });
-        if (repoRes.ok) {
-          const repoData = await repoRes.json();
-          if (repoData.default_branch) defaultBranch = repoData.default_branch;
-        }
-      } catch(e) {}
-
-      // Step 2: Build candidate URLs for zipball and archive using the correct default branch
+      // Bypass GitHub API rate limit (403) by directly attempting public archive zip URLs for main and master branches
       const candidateUrls = [
-        `https://api.github.com/repos/${fullName}/zipball/${defaultBranch}`,
-        `https://corsproxy.io/?${encodeURIComponent(`https://api.github.com/repos/${fullName}/zipball/${defaultBranch}`)}`,
-        `https://api.allorigins.win/raw?url=${encodeURIComponent(`https://api.github.com/repos/${fullName}/zipball/${defaultBranch}`)}`,
-        `https://github.com/${fullName}/archive/refs/heads/${defaultBranch}.zip`,
-        `https://corsproxy.io/?${encodeURIComponent(`https://github.com/${fullName}/archive/refs/heads/${defaultBranch}.zip`)}`,
-        `https://api.allorigins.win/raw?url=${encodeURIComponent(`https://github.com/${fullName}/archive/refs/heads/${defaultBranch}.zip`)}`
+        `https://github.com/${fullName}/archive/refs/heads/main.zip`,
+        `https://corsproxy.io/?${encodeURIComponent(`https://github.com/${fullName}/archive/refs/heads/main.zip`)}`,
+        `https://api.allorigins.win/raw?url=${encodeURIComponent(`https://github.com/${fullName}/archive/refs/heads/main.zip`)}`,
+        `https://github.com/${fullName}/archive/refs/heads/master.zip`,
+        `https://corsproxy.io/?${encodeURIComponent(`https://github.com/${fullName}/archive/refs/heads/master.zip`)}`,
+        `https://api.allorigins.win/raw?url=${encodeURIComponent(`https://github.com/${fullName}/archive/refs/heads/master.zip`)}`
       ];
 
       let zipBuffer = null;
@@ -327,14 +317,13 @@ class IntegratedADML {
       }
 
       if (!zipBuffer) {
-        this.toast(`Zipball endpoints blocked, packing via Contents API (${defaultBranch})...`);
-        await this.installGithubSource(fullName, defaultBranch);
-        return;
+        // Fallback: Try downloading raw main manifest / files directly or notify user
+        throw new Error("Direct archive download blocked or repository branch mismatch.");
       }
 
-      const sourceName = `${fullName.replace(/[^a-z0-9._-]/gi, "-")}-${defaultBranch}.zip`;
+      const sourceName = `${fullName.replace(/[^a-z0-9._-]/gi, "-")}-archive.zip`;
       await this.installZip(zipBuffer, sourceName);
-    } catch (error) { this.toast(`GitHub install failed: ${error.message}`); }
+    } catch (error) { this.toast(`GitHub install failed: ${error.message}. Try installing via local ZIP dropzone.`); }
   }
 
   async installGithubSource(fullName, branch = "main") {
