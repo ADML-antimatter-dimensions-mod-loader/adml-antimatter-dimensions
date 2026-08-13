@@ -293,51 +293,52 @@ class IntegratedADML {
 
   async installGithubRepo(fullName) {
     try {
-      this.toast(`Fetching repository source for ${fullName} (Easy-BDP CORS Bypass)...`);
+      this.toast(`Resolving default branch and fetching ${fullName}...`);
       
-      // Easy-BDP style robust multi-proxy fetch for GitHub repository contents / zipball
+      // Step 1: Fetch repository metadata to discover default branch (e.g. main or master)
+      let defaultBranch = "main";
+      try {
+        const repoRes = await fetch(`https://api.github.com/repos/${fullName}`, { headers: { Accept: "application/vnd.github+json" } });
+        if (repoRes.ok) {
+          const repoData = await repoRes.json();
+          if (repoData.default_branch) defaultBranch = repoData.default_branch;
+        }
+      } catch(e) {}
+
+      // Step 2: Build candidate URLs for zipball and archive using the correct default branch
       const candidateUrls = [
-        `https://api.github.com/repos/${fullName}/zipball/main`,
-        `https://corsproxy.io/?${encodeURIComponent(`https://api.github.com/repos/${fullName}/zipball/main`)}`,
-        `https://api.allorigins.win/raw?url=${encodeURIComponent(`https://api.github.com/repos/${fullName}/zipball/main`)}`,
-        `https://thingproxy.freeboard.io/fetch/https://api.github.com/repos/${fullName}/zipball/main`,
-        `https://github.com/${fullName}/archive/refs/heads/main.zip`,
-        `https://corsproxy.io/?${encodeURIComponent(`https://github.com/${fullName}/archive/refs/heads/main.zip`)}`,
-        `https://api.allorigins.win/raw?url=${encodeURIComponent(`https://github.com/${fullName}/archive/refs/heads/main.zip`)}`
+        `https://api.github.com/repos/${fullName}/zipball/${defaultBranch}`,
+        `https://corsproxy.io/?${encodeURIComponent(`https://api.github.com/repos/${fullName}/zipball/${defaultBranch}`)}`,
+        `https://api.allorigins.win/raw?url=${encodeURIComponent(`https://api.github.com/repos/${fullName}/zipball/${defaultBranch}`)}`,
+        `https://github.com/${fullName}/archive/refs/heads/${defaultBranch}.zip`,
+        `https://corsproxy.io/?${encodeURIComponent(`https://github.com/${fullName}/archive/refs/heads/${defaultBranch}.zip`)}`,
+        `https://api.allorigins.win/raw?url=${encodeURIComponent(`https://github.com/${fullName}/archive/refs/heads/${defaultBranch}.zip`)}`
       ];
 
       let zipBuffer = null;
-      let lastError = null;
-
       for (const url of candidateUrls) {
         try {
-          const res = await fetch(url, { headers: { Accept: "application/vnd.github+json" } });
+          const res = await fetch(url);
           if (res.ok) {
             zipBuffer = await res.arrayBuffer();
             break;
-          } else {
-            lastError = new Error(`HTTP ${res.status}`);
           }
-        } catch (err) {
-          lastError = err;
-        }
+        } catch (err) {}
       }
 
       if (!zipBuffer) {
-        // Fallback to Contents API client-side packaging if zipball/archive endpoints are blocked
-        this.toast(`Zipball blocked, packing via Contents API (Easy-BDP fallback)...`);
-        await this.installGithubSource(fullName);
+        this.toast(`Zipball endpoints blocked, packing via Contents API (${defaultBranch})...`);
+        await this.installGithubSource(fullName, defaultBranch);
         return;
       }
 
-      const sourceName = `${fullName.replace(/[^a-z0-9._-]/gi, "-")}-main.zip`;
+      const sourceName = `${fullName.replace(/[^a-z0-9._-]/gi, "-")}-${defaultBranch}.zip`;
       await this.installZip(zipBuffer, sourceName);
     } catch (error) { this.toast(`GitHub install failed: ${error.message}`); }
   }
 
-  async installGithubSource(fullName) {
-    const apiUrl = `https://api.github.com/repos/${fullName}/git/trees/main?recursive=1`;
-    let res = null;
+  async installGithubSource(fullName, branch = "main") {
+    const apiUrl = `https://api.github.com/repos/${fullName}/git/trees/${branch}?recursive=1`;
     let data = null;
     
     for (const u of [apiUrl, `https://corsproxy.io/?${encodeURIComponent(apiUrl)}`, `https://api.allorigins.win/raw?url=${encodeURIComponent(apiUrl)}`]) {
@@ -347,7 +348,7 @@ class IntegratedADML {
       } catch(e) {}
     }
 
-    if (!data || !data.tree) throw new Error("Failed to fetch repository tree via Contents API.");
+    if (!data || !data.tree) throw new Error(`Failed to fetch repository tree for branch '${branch}' via Contents API.`);
     const tree = data.tree;
 
     const zip = new JSZip();
@@ -355,7 +356,7 @@ class IntegratedADML {
 
     for (const item of tree) {
       if (item.type === "blob") {
-        const rawUrl = `https://raw.githubusercontent.com/${fullName}/main/${item.path}`;
+        const rawUrl = `https://raw.githubusercontent.com/${fullName}/${branch}/${item.path}`;
         let contentRes = null;
         for (const proxyUrl of [rawUrl, `https://corsproxy.io/?${encodeURIComponent(rawUrl)}`, `https://api.allorigins.win/raw?url=${encodeURIComponent(rawUrl)}`]) {
           try {
@@ -372,7 +373,7 @@ class IntegratedADML {
 
     if (!fileCount) throw new Error("No files found in repository tree.");
     const zipBuffer = await zip.generateAsync({ type: "nodebuffer", compression: "DEFLATE" });
-    await this.installZip(zipBuffer, `${fullName.replace(/[^a-z0-9._-]/gi, "-")}-source.zip`);
+    await this.installZip(zipBuffer, `${fullName.replace(/[^a-z0-9._-]/gi, "-")}-${branch}-source.zip`);
   }
 
   async installFile(file) {
