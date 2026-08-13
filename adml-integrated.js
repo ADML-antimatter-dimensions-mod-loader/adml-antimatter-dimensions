@@ -308,9 +308,32 @@ class IntegratedADML {
         const repo = await repoResponse.json();
         downloadUrl = repo.zipball_url;
       }
-      const zipResponse = await fetch(downloadUrl);
-      if (!zipResponse.ok) throw new Error(`ZIP download HTTP ${zipResponse.status}`);
-      await this.installZip(await zipResponse.arrayBuffer(), sourceName);
+      let zipBuffer = null;
+      let lastError = null;
+      const candidateUrls = [
+        downloadUrl,
+        `https://corsproxy.io/?${encodeURIComponent(downloadUrl)}`,
+        `https://api.allorigins.win/raw?url=${encodeURIComponent(downloadUrl)}`
+      ];
+
+      for (const url of candidateUrls) {
+        try {
+          const zipResponse = await fetch(url);
+          if (zipResponse.ok) {
+            zipBuffer = await zipResponse.arrayBuffer();
+            break;
+          } else {
+            lastError = new Error(`HTTP ${zipResponse.status}`);
+          }
+        } catch (err) {
+          lastError = err;
+        }
+      }
+
+      if (!zipBuffer) {
+        throw new Error(`ZIP download failed (404/CORS). ${lastError ? lastError.message : ""}`);
+      }
+      await this.installZip(zipBuffer, sourceName);
     } catch (error) { this.toast(`GitHub install failed: ${error.message}`); }
   }
 
