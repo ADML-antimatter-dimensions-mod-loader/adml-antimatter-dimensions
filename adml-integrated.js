@@ -180,7 +180,7 @@ class IntegratedADML {
       <div id="adml-int-overlay">
         <section id="adml-int-modal" role="dialog" aria-modal="true" aria-labelledby="adml-int-title">
           <header class="adml-int-head"><div><div class="adml-int-kicker">ADML / INTEGRATED LOADER</div><h2 id="adml-int-title" class="adml-int-title">Plugin Manager <span class="adml-int-version">${this.version}</span></h2></div><div class="adml-int-actions"><button type="button" class="adml-int-secondary adml-int-help-open">HOW TO PLAY</button><button type="button" class="adml-int-secondary adml-int-catalog-open">GITHUB CATALOG</button><button type="button" class="adml-int-secondary adml-int-forge-open">FORGE MOD</button><button type="button" class="adml-int-close">CLOSE</button></div></header>
-          <div class="adml-int-body"><div class="adml-int-warning"><strong>Review ZIP contents before enabling.</strong><br />External plugins can access game state and the user interface. Only run ZIP files from sources you trust.</div><div class="adml-int-list"></div><div class="adml-int-install"><input class="adml-int-url" type="url" placeholder="Or enter a plugin ZIP URL" aria-label="Plugin ZIP URL" /><button class="adml-int-primary adml-int-url-install" type="button">INSTALL URL</button></div><input class="adml-int-file" type="file" accept=".zip,application/zip" hidden /><div class="adml-int-dropzone" role="button" tabindex="0">DROP A LOCAL ZIP HERE<br />or click to choose a file</div></div>
+          <div class="adml-int-body"><div class="adml-int-warning"><strong>All plugins can be installed at your own risk.</strong><br />External plugins run in the game environment under user responsibility. CORS proxy fallbacks enabled for GitHub ZIP catalogs.</div><div class="adml-int-list"></div><div class="adml-int-install"><input class="adml-int-url" type="url" placeholder="Or enter a plugin ZIP URL" aria-label="Plugin ZIP URL" /><button class="adml-int-primary adml-int-url-install" type="button">INSTALL URL</button></div><input class="adml-int-file" type="file" accept=".zip,application/zip" hidden /><div class="adml-int-dropzone" role="button" tabindex="0">DROP A LOCAL ZIP HERE<br />or click to choose a file</div></div>
         </section>
       </div>`;
     document.body.appendChild(host);
@@ -313,7 +313,8 @@ class IntegratedADML {
       const candidateUrls = [
         downloadUrl,
         `https://corsproxy.io/?${encodeURIComponent(downloadUrl)}`,
-        `https://api.allorigins.win/raw?url=${encodeURIComponent(downloadUrl)}`
+        `https://api.allorigins.win/raw?url=${encodeURIComponent(downloadUrl)}`,
+        `https://thingproxy.freeboard.io/fetch/${downloadUrl}`
       ];
 
       for (const url of candidateUrls) {
