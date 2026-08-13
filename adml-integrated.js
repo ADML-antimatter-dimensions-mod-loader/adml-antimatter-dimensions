@@ -293,10 +293,48 @@ class IntegratedADML {
 
   async installGithubRepo(fullName) {
     try {
-      this.toast(`Downloading ${fullName} (Self-responsibility direct archive)...`);
-      
-      // Bypass GitHub API rate limit (403) by directly attempting public archive zip URLs for main and master branches
-      const candidateUrls = [
+      this.toast(`Fetching catalog / root.json for ${fullName}...`);
+
+      // Step 1: Try fetching root.json to get historical versions & latest release URL (bypassing GitHub API 403)
+      const rootJsonUrls = [
+        `https://raw.githubusercontent.com/${fullName}/main/root.json`,
+        `https://raw.githubusercontent.com/${fullName}/master/root.json`,
+        `https://corsproxy.io/?${encodeURIComponent(`https://raw.githubusercontent.com/${fullName}/main/root.json`)}`,
+        `https://api.allorigins.win/raw?url=${encodeURIComponent(`https://raw.githubusercontent.com/${fullName}/main/root.json`)}`
+      ];
+
+      let rootData = null;
+      for (const u of rootJsonUrls) {
+        try {
+          const r = await fetch(u);
+          if (r.ok) {
+            rootData = await r.json();
+            break;
+          }
+        } catch(e) {}
+      }
+
+      let downloadUrl = "";
+      let sourceName = `${fullName.replace(/[^a-z0-9._-]/gi, "-")}-plugin.zip`;
+
+      if (rootData && rootData.latest && rootData.latest.download) {
+        // Resolve relative download path from root.json if needed
+        let rawDl = rootData.latest.download;
+        if (rawDl.startsWith(".")) {
+          const parts = fullName.split("/");
+          downloadUrl = `https://raw.githubusercontent.com/${parts[0]}/${parts[1]}/main/${rawDl.replace(/^\.\//, "")}`;
+        } else {
+          downloadUrl = rawDl;
+        }
+        sourceName = `${fullName.replace(/[^a-z0-9._-]/gi, "-")}-${rootData.latest.version || "latest"}.zip`;
+      }
+
+      // Step 2: If root.json is not present, fall back to direct archive zip URLs for main and master branches
+      const candidateUrls = downloadUrl ? [
+        downloadUrl,
+        `https://corsproxy.io/?${encodeURIComponent(downloadUrl)}`,
+        `https://api.allorigins.win/raw?url=${encodeURIComponent(downloadUrl)}`
+      ] : [
         `https://github.com/${fullName}/archive/refs/heads/main.zip`,
         `https://corsproxy.io/?${encodeURIComponent(`https://github.com/${fullName}/archive/refs/heads/main.zip`)}`,
         `https://api.allorigins.win/raw?url=${encodeURIComponent(`https://github.com/${fullName}/archive/refs/heads/main.zip`)}`,
@@ -317,11 +355,9 @@ class IntegratedADML {
       }
 
       if (!zipBuffer) {
-        // Fallback: Try downloading raw main manifest / files directly or notify user
-        throw new Error("Direct archive download blocked or repository branch mismatch.");
+        throw new Error("Direct archive download and root.json fetch both failed.");
       }
 
-      const sourceName = `${fullName.replace(/[^a-z0-9._-]/gi, "-")}-archive.zip`;
       await this.installZip(zipBuffer, sourceName);
     } catch (error) { this.toast(`GitHub install failed: ${error.message}. Try installing via local ZIP dropzone.`); }
   }
