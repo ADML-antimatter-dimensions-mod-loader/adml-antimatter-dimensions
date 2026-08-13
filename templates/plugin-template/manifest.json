@@ -1,0 +1,12 @@
+{
+  "id": "adml.plugin.template",
+  "name": "ADML Plugin Template",
+  "version": "1.0.0",
+  "author": "ADML Developer",
+  "description": "A robust starting template for Antimatter Dimensions MOD Loader (ADML) v1 plugins.",
+  "main": "plugin.js",
+  "apiVersion": "1",
+  "type": "game-mod",
+  "topics": ["adml-plugin"],
+  "license": "MIT"
+}
