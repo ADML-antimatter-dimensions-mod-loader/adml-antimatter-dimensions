@@ -293,93 +293,68 @@ class IntegratedADML {
 
   async installGithubRepo(fullName) {
     try {
-      this.toast(`Fetching versions for ${fullName}...`);
-      const headers = { Accept: "application/vnd.github+json" };
-      const releasesRes = await fetch(`https://api.github.com/repos/${fullName}/releases`, { headers });
-      let releases = [];
-      if (releasesRes.ok) {
-        releases = await releasesRes.json();
-      }
-
-      // Build version selection modal
-      const host = document.createElement("div");
-      host.style.cssText = "position:fixed;inset:0;z-index:999999;display:flex;align-items:center;justify-content:center;background:rgba(5,9,13,.82);backdrop-filter:blur(4px);padding:16px;";
+      this.toast(`Fetching repository source for ${fullName} (Easy-BDP CORS Bypass)...`);
       
-      let optionsHtml = `<option value="HEAD">Development Source (main branch / unzipped)</option>`;
-      if (releases.length) {
-        releases.forEach(rel => {
-          const tag = rel.tag_name;
-          const name = rel.name || tag;
-          optionsHtml += `<option value="release:${tag}">Release: ${name} (${tag})</option>`;
-        });
-      } else {
-        optionsHtml += `<option value="" disabled>No releases published yet</option>`;
-      }
+      // Easy-BDP style robust multi-proxy fetch for GitHub repository contents / zipball
+      const candidateUrls = [
+        `https://api.github.com/repos/${fullName}/zipball/main`,
+        `https://corsproxy.io/?${encodeURIComponent(`https://api.github.com/repos/${fullName}/zipball/main`)}`,
+        `https://api.allorigins.win/raw?url=${encodeURIComponent(`https://api.github.com/repos/${fullName}/zipball/main`)}`,
+        `https://thingproxy.freeboard.io/fetch/https://api.github.com/repos/${fullName}/zipball/main`,
+        `https://github.com/${fullName}/archive/refs/heads/main.zip`,
+        `https://corsproxy.io/?${encodeURIComponent(`https://github.com/${fullName}/archive/refs/heads/main.zip`)}`,
+        `https://api.allorigins.win/raw?url=${encodeURIComponent(`https://github.com/${fullName}/archive/refs/heads/main.zip`)}`
+      ];
 
-      host.innerHTML = `<div style="width:min(480px,100%);background:#0d151c;border:1px solid #9bd4d7;padding:24px;color:#f3f1e8;font-family:Arial,sans-serif;box-shadow:0 12px 32px rgba(0,0,0,.6)">
-        <h3 style="margin:0 0 12px;color:#9bd4d7;font-size:18px">Select Version to Install</h3>
-        <p style="margin:0 0 16px;font-size:13px;color:#97a9ae">Choose whether to install a published release ZIP or the raw development source code (main branch, auto-packaged).</p>
-        <label style="display:block;margin-bottom:8px;font-size:11px;color:#e6a35c;font-weight:bold">TARGET VERSION / BRANCH</label>
-        <select id="adml-version-select" style="width:100%;padding:10px;background:#080d12;border:1px solid rgba(155,212,215,.4);color:#f3f1e8;margin-bottom:20px;font-size:13px;">${optionsHtml}</select>
-        <div style="display:flex;justify-content:flex-end;gap:10px;">
-          <button type="button" id="adml-ver-cancel" style="background:transparent;border:1px solid rgba(155,212,215,.4);color:#9bd4d7;padding:8px 16px;cursor:pointer;">Cancel</button>
-          <button type="button" id="adml-ver-install" style="background:#e6a35c;border:none;color:#0b1016;padding:8px 18px;font-weight:bold;cursor:pointer;">Install</button>
-        </div>
-      </div>`;
+      let zipBuffer = null;
+      let lastError = null;
 
-      document.body.appendChild(host);
-      
-      return new Promise((resolve) => {
-        host.querySelector("#adml-ver-cancel").addEventListener("click", () => { host.remove(); resolve(); });
-        host.querySelector("#adml-ver-install").addEventListener("click", async () => {
-          const val = host.querySelector("#adml-version-select").value;
-          host.remove();
-          try {
-            if (val === "HEAD") {
-              this.toast(`Packing development source from ${fullName} (CORS safe)...`);
-              await this.installGithubSource(fullName);
-            } else if (val.startsWith("release:")) {
-              const tag = val.replace("release:", "");
-              const rel = releases.find(r => r.tag_name === tag);
-              const asset = rel?.assets?.find(a => a.name.toLowerCase().endsWith(".zip"));
-              let downloadUrl = asset ? asset.browser_download_url : `https://github.com/${fullName}/archive/refs/tags/${tag}.zip`;
-              
-              this.toast(`Downloading release ${tag}...`);
-              let zipBuffer = null;
-              const urls = [downloadUrl, `https://corsproxy.io/?${encodeURIComponent(downloadUrl)}`, `https://api.allorigins.win/raw?url=${encodeURIComponent(downloadUrl)}`];
-              for (const u of urls) {
-                try {
-                  const res = await fetch(u);
-                  if (res.ok) { zipBuffer = await res.arrayBuffer(); break; }
-                } catch(e) {}
-              }
-              if (!zipBuffer) throw new Error("Failed to download release ZIP via proxies.");
-              await this.installZip(zipBuffer, `${fullName.replace(/[^a-z0-9._-]/gi, "-")}-${tag}.zip`);
-            }
-            resolve();
-          } catch(err) {
-            this.toast(`Installation error: ${err.message}`);
-            resolve();
+      for (const url of candidateUrls) {
+        try {
+          const res = await fetch(url, { headers: { Accept: "application/vnd.github+json" } });
+          if (res.ok) {
+            zipBuffer = await res.arrayBuffer();
+            break;
+          } else {
+            lastError = new Error(`HTTP ${res.status}`);
           }
-        });
-      });
+        } catch (err) {
+          lastError = err;
+        }
+      }
+
+      if (!zipBuffer) {
+        // Fallback to Contents API client-side packaging if zipball/archive endpoints are blocked
+        this.toast(`Zipball blocked, packing via Contents API (Easy-BDP fallback)...`);
+        await this.installGithubSource(fullName);
+        return;
+      }
+
+      const sourceName = `${fullName.replace(/[^a-z0-9._-]/gi, "-")}-main.zip`;
+      await this.installZip(zipBuffer, sourceName);
     } catch (error) { this.toast(`GitHub install failed: ${error.message}`); }
   }
 
   async installGithubSource(fullName) {
-    // Fetch recursive tree via GitHub Contents API to bypass CORS / zipball issues completely
     const apiUrl = `https://api.github.com/repos/${fullName}/git/trees/main?recursive=1`;
-    const res = await fetch(apiUrl, { headers: { Accept: "application/vnd.github+json" } });
-    if (!res.ok) throw new Error(`Failed to fetch repo tree (HTTP ${res.status}). Is branch main?`);
-    const data = await res.json();
-    const tree = data.tree || [];
+    let res = null;
+    let data = null;
+    
+    for (const u of [apiUrl, `https://corsproxy.io/?${encodeURIComponent(apiUrl)}`, `https://api.allorigins.win/raw?url=${encodeURIComponent(apiUrl)}`]) {
+      try {
+        const r = await fetch(u, { headers: { Accept: "application/vnd.github+json" } });
+        if (r.ok) { data = await r.json(); break; }
+      } catch(e) {}
+    }
+
+    if (!data || !data.tree) throw new Error("Failed to fetch repository tree via Contents API.");
+    const tree = data.tree;
 
     const zip = new JSZip();
     let fileCount = 0;
 
     for (const item of tree) {
       if (item.type === "blob") {
-        // Fetch raw file content using gh proxy or raw URL
         const rawUrl = `https://raw.githubusercontent.com/${fullName}/main/${item.path}`;
         let contentRes = null;
         for (const proxyUrl of [rawUrl, `https://corsproxy.io/?${encodeURIComponent(rawUrl)}`, `https://api.allorigins.win/raw?url=${encodeURIComponent(rawUrl)}`]) {
@@ -397,7 +372,7 @@ class IntegratedADML {
 
     if (!fileCount) throw new Error("No files found in repository tree.");
     const zipBuffer = await zip.generateAsync({ type: "nodebuffer", compression: "DEFLATE" });
-    await this.installZip(zipBuffer, `${fullName.replace(/[^a-z0-9._-]/gi, "-")}-main-source.zip`);
+    await this.installZip(zipBuffer, `${fullName.replace(/[^a-z0-9._-]/gi, "-")}-source.zip`);
   }
 
   async installFile(file) {
