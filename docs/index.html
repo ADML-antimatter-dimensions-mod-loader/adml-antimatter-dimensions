@@ -31,13 +31,22 @@
     <header>
       <div class="eyebrow">Antimatter Dimensions Mod Loader</div>
       <h1>ADML Documentation</h1>
-      <p class="lead">ADMLの公式Webドキュメントポータルです。API仕様、マニフェスト、セーブ統合、セキュリティ、導入手順、MOD Forgeの各ガイドを快適に閲覧できるHTML版を提供しています（Markdown版もリポジトリ内に保持しています）。</p>
+      <p class="lead">ADMLの公式Webドキュメントポータルです。API v1.0、API v1.1、API比較表、マニフェスト、セーブ統合、セキュリティ、導入手順、MOD Forgeの各ガイドを快適に閲覧できるHTML版を提供しています。</p>
     </header>
+
+    <section aria-labelledby="api-versions">
+      <h2 id="api-versions">API Versions & Comparison</h2>
+      <div class="grid">
+        <a class="card" href="API-v1.0.html"><strong>API v1.0 (Legacy)</strong><span>初期のZIPプラグインシステムで採用されていた旧バージョンのAPI仕様です。</span></a>
+        <a class="card" href="API-v1.1.html"><strong>API v1.1 (Current)</strong><span>依存関係の自動検証、バージョン互換性、セーブ統合を含む現行の標準API仕様です。</span></a>
+        <a class="card" href="API-compare.html"><strong>API v1.0 vs v1.1 比較表</strong><span>旧API v1.0と現行API v1.1の機能差分や仕様の違いを一目で確認できます。</span></a>
+      </div>
+    </section>
 
     <section aria-labelledby="core">
       <h2 id="core">Core references (HTML)</h2>
       <div class="grid">
-        <a class="card wide" href="API.html"><strong>API.html — API v1.1 完全リファレンス</strong><span>プラグインAPI、patch、addStyle、storage、イベント、injectData、mods、endgame、GitHub、Forge、i18n、language、ゲーム参照getter、manifestの依存関係・互換性を掲載しています。</span></a>
+        <a class="card wide" href="API.html"><strong>API.html — API v1.1 完全リファレンス</strong><span>プラグインAPI、patch、addStyle、storage、イベント、injectData、mods、endgame、GitHub、Forge、i18n、language、ゲーム参照getterを網羅した詳細版です。</span></a>
         <a class="card" href="MANIFEST.html"><strong>MANIFEST.html — manifestと配布形式</strong><span>manifest.jsonの全フィールド、ZIP構成、dependencies、compatibility、root.jsonカタログの仕様です。</span></a>
         <a class="card" href="SECURITY.html"><strong>SECURITY.html — セキュリティガイド</strong><span>第三者コード、検査、明示的な有効化、セーブインポート警告、依存関係の確認方法を説明します。</span></a>
         <a class="card" href="SAVE.html"><strong>SAVE.html — 標準セーブとMODデータ</strong><span>Export/Import save、ファイル入出力、MOD本体・有効化状態・storageの扱いと復旧手順です。</span></a>
