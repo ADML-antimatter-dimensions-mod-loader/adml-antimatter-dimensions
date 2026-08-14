@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Security Guide - ADML Documentation</title>
+  <style>
+    :root { color-scheme: dark; font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #0b1118; color: #e6edf3; }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: radial-gradient(circle at top right, #142b3b 0, #0b1118 42rem); line-height: 1.7; padding-bottom: 80px; }
+    .nav-bar { background: rgba(18, 31, 42, 0.9); border-bottom: 1px solid #294052; padding: 14px 24px; display: flex; gap: 16px; align-items: center; position: sticky; top: 0; backdrop-filter: blur(8px); z-index: 10; }
+    .nav-bar a { color: #63d7df; text-decoration: none; font-weight: 600; font-size: 0.95rem; }
+    .nav-bar a:hover { text-decoration: underline; }
+    .nav-bar span { color: #435b6c; }
+    main { width: min(920px, calc(100% - 32px)); margin: 40px auto 0; background: rgba(15, 25, 35, 0.85); border: 1px solid #294052; border-radius: 12px; padding: 40px clamp(20px, 5vw, 56px); box-shadow: 0 16px 40px rgba(0,0,0,0.3); }
+    h1, h2, h3, h4 { color: #f8fafc; font-weight: 700; line-height: 1.3; margin-top: 1.8em; margin-bottom: 0.6em; }
+    h1 { font-size: clamp(1.8rem, 4vw, 2.6rem); margin-top: 0; border-bottom: 1px solid #294052; padding-bottom: 16px; }
+    h2 { font-size: 1.45rem; border-bottom: 1px solid #1f3344; padding-bottom: 8px; }
+    h3 { font-size: 1.15rem; }
+    p, ul, ol { color: #cbd5e1; margin: 1em 0; }
+    a { color: #63d7df; text-decoration: underline; text-underline-offset: 3px; }
+    code { background: rgba(30, 48, 64, 0.9); color: #b8f0f2; padding: 0.2em 0.4em; border-radius: 4px; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 0.9em; }
+    pre { background: rgba(10, 18, 25, 0.95); border: 1px solid #294052; border-radius: 8px; padding: 16px; overflow-x: auto; margin: 1.5em 0; }
+    pre code { background: none; color: #e2e8f0; padding: 0; }
+    table { width: 100%; border-collapse: collapse; margin: 1.8em 0; font-size: 0.95rem; display: block; overflow-x: auto; }
+    th, td { border: 1px solid #294052; padding: 10px 14px; text-align: left; }
+    th { background: rgba(25, 43, 58, 0.9); color: #f8fafc; font-weight: 600; }
+    td { background: rgba(15, 25, 35, 0.5); color: #cbd5e1; }
+    blockquote { border-left: 4px solid #63d7df; background: rgba(99, 215, 223, 0.08); margin: 1.5em 0; padding: 12px 20px; border-radius: 0 8px 8px 0; color: #e2e8f0; }
+    blockquote p { margin: 0; color: #e2e8f0; }
+    hr { border: none; border-top: 1px solid #294052; margin: 2.5em 0; }
+  </style>
+</head>
+<body>
+  <div class="nav-bar">
+    <a href="index.html">← ドキュメント一覧</a>
+    <span>/</span>
+    <a href="API.html">API v1.1</a>
+    <span>/</span>
+    <a href="MANIFEST.html">Manifest</a>
+    <span>/</span>
+    <a href="SAVE.html">Save Data</a>
+    <span>/</span>
+    <a href="SECURITY.html">Security</a>
+    <span>/</span>
+    <a href="GUIDE.html">User Guide</a>
+    <span>/</span>
+    <a href="FORGE.html">MOD Forge</a>
+  </div>
+  <main>
+    <h1 id="adml">ADML セキュリティガイド</h1>
+<p>ADMLプラグインは、ゲームページと同じブラウザコンテキストでJavaScriptを実行します。Shadow DOMによるUI分離や検査画面は表示上の衝突を減らしますが、悪意あるコードを完全なサンドボックスへ隔離するものではありません。</p>
+<h2 id="_1">インストール前の確認</h2>
+<p>まずZIPの取得元、リポジトリの所有者、manifestのID・作者・説明・バージョンを確認してください。<code>root.json</code> は配布カタログであり、安全性を保証する署名ではありません。ZIPを <code>INSPECT</code> で開き、manifestとファイル一覧を確認してから明示的に <code>ENABLE</code> してください。</p>
+<h2 id="_2">危険な可能性がある処理</h2>
+<p>次の処理を含むMODは、目的と範囲を理解できる場合だけ使用してください。外部URLへの通信、ゲームセーブやlocalStorageの読み取り、既存メソッドのパッチ、動的コード生成、ユーザー入力のHTML挿入、他MODコードの読み取り、過剰なタイマーやMutationObserverの登録は、ゲームデータやプライバシーに影響する可能性があります。</p>
+<h2 id="_3">セーブのインポート</h2>
+<p>MOD領域を含むセーブをインポートする前には、危険性を知らせる確認ダイアログを表示します。承認しない限り、MODコード・有効化状態・MOD storageを適用してはいけません。承認した場合も、インポート後は有効化一覧とmanifestを再確認してください。</p>
+<h2 id="_4">依存関係と互換性</h2>
+<p>manifestの <code>dependencies</code> と <code>compatibility</code> を確認し、依存MODが不足している場合や対象バージョンが一致しない場合は有効化しないでください。API v1.1のフィールドは、ローダーが検証を提供している場合その結果を使用し、未対応の旧版ではプラグイン側でも互換性を検査してください。</p>
+<h2 id="_5">報告と復旧</h2>
+<p>不審な動作がある場合はMODを無効化し、ブラウザの開発者コンソールに表示されたエラー、manifest、取得元URL、再現手順を記録してください。セーブを復旧する前に、信頼できるバックアップへ戻してください。サイトデータを削除すると、ゲームの進行やインストール済みMODが消える場合があります。</p>
+<blockquote>
+<p><strong>原則:</strong> 公開カタログに存在することは、信頼できることを意味しません。コードを読めないMODは有効化しないでください。</p>
+</blockquote>
+  </main>
+</body>
+</html>

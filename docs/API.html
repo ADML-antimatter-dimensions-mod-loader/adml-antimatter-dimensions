@@ -1,0 +1,972 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>API v1.1 Reference - ADML Documentation</title>
+  <style>
+    :root { color-scheme: dark; font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #0b1118; color: #e6edf3; }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: radial-gradient(circle at top right, #142b3b 0, #0b1118 42rem); line-height: 1.7; padding-bottom: 80px; }
+    .nav-bar { background: rgba(18, 31, 42, 0.9); border-bottom: 1px solid #294052; padding: 14px 24px; display: flex; gap: 16px; align-items: center; position: sticky; top: 0; backdrop-filter: blur(8px); z-index: 10; }
+    .nav-bar a { color: #63d7df; text-decoration: none; font-weight: 600; font-size: 0.95rem; }
+    .nav-bar a:hover { text-decoration: underline; }
+    .nav-bar span { color: #435b6c; }
+    main { width: min(920px, calc(100% - 32px)); margin: 40px auto 0; background: rgba(15, 25, 35, 0.85); border: 1px solid #294052; border-radius: 12px; padding: 40px clamp(20px, 5vw, 56px); box-shadow: 0 16px 40px rgba(0,0,0,0.3); }
+    h1, h2, h3, h4 { color: #f8fafc; font-weight: 700; line-height: 1.3; margin-top: 1.8em; margin-bottom: 0.6em; }
+    h1 { font-size: clamp(1.8rem, 4vw, 2.6rem); margin-top: 0; border-bottom: 1px solid #294052; padding-bottom: 16px; }
+    h2 { font-size: 1.45rem; border-bottom: 1px solid #1f3344; padding-bottom: 8px; }
+    h3 { font-size: 1.15rem; }
+    p, ul, ol { color: #cbd5e1; margin: 1em 0; }
+    a { color: #63d7df; text-decoration: underline; text-underline-offset: 3px; }
+    code { background: rgba(30, 48, 64, 0.9); color: #b8f0f2; padding: 0.2em 0.4em; border-radius: 4px; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 0.9em; }
+    pre { background: rgba(10, 18, 25, 0.95); border: 1px solid #294052; border-radius: 8px; padding: 16px; overflow-x: auto; margin: 1.5em 0; }
+    pre code { background: none; color: #e2e8f0; padding: 0; }
+    table { width: 100%; border-collapse: collapse; margin: 1.8em 0; font-size: 0.95rem; display: block; overflow-x: auto; }
+    th, td { border: 1px solid #294052; padding: 10px 14px; text-align: left; }
+    th { background: rgba(25, 43, 58, 0.9); color: #f8fafc; font-weight: 600; }
+    td { background: rgba(15, 25, 35, 0.5); color: #cbd5e1; }
+    blockquote { border-left: 4px solid #63d7df; background: rgba(99, 215, 223, 0.08); margin: 1.5em 0; padding: 12px 20px; border-radius: 0 8px 8px 0; color: #e2e8f0; }
+    blockquote p { margin: 0; color: #e2e8f0; }
+    hr { border: none; border-top: 1px solid #294052; margin: 2.5em 0; }
+  </style>
+</head>
+<body>
+  <div class="nav-bar">
+    <a href="index.html">← ドキュメント一覧</a>
+    <span>/</span>
+    <a href="API.html">API v1.1</a>
+    <span>/</span>
+    <a href="MANIFEST.html">Manifest</a>
+    <span>/</span>
+    <a href="SAVE.html">Save Data</a>
+    <span>/</span>
+    <a href="SECURITY.html">Security</a>
+    <span>/</span>
+    <a href="GUIDE.html">User Guide</a>
+    <span>/</span>
+    <a href="FORGE.html">MOD Forge</a>
+  </div>
+  <main>
+    <h1 id="adml-api-v11">ADML API v1.1 リファレンス</h1>
+<p>Antimatter Dimensions MOD Loader（ADML）のプラグインAPI仕様書です。本書はAPIだけを扱います。導入手順は <a href="GUIDE.html"><code>GUIDE.md</code></a>、manifestと配布形式は <a href="MANIFEST.html"><code>MANIFEST.md</code></a>、保存統合は <a href="SAVE.html"><code>SAVE.md</code></a>、安全性は <a href="SECURITY.html"><code>SECURITY.md</code></a> を参照してください。</p>
+<blockquote>
+<p><strong>APIの入口:</strong> プラグインの <code>constructor(api)</code> に渡されるプラグイン専用APIオブジェクトです。ゲームページ上のグローバルローダーは小文字の <code>window.adml</code> です。<code>window.ADML</code> を前提にしないでください。</p>
+</blockquote>
+<h2 id="1">1. 最小プラグイン形式</h2>
+<p>ZIPの中に <code>manifest.json</code> と、manifestの <code>main</code> で指定したJavaScriptファイルを置きます。エントリーファイルは <code>Plugin</code> クラス、または <code>createPlugin</code> 関数を提供してください。</p>
+<pre><code class="language-js">class Plugin {
+  constructor(api) {
+    this.api = api;
+  }
+
+  async onload() {
+    this.api.notify(&quot;Plugin enabled&quot;);
+  }
+
+  async onunload() {
+    this.api.notify(&quot;Plugin disabled&quot;);
+  }
+}
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>エントリー</th>
+<th>型</th>
+<th style="text-align: right;">必須</th>
+<th>説明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Plugin</code></td>
+<td>class</td>
+<td style="text-align: right;">いずれか必須</td>
+<td><code>new Plugin(api)</code> で生成されるクラスです。</td>
+</tr>
+<tr>
+<td><code>createPlugin</code></td>
+<td>function</td>
+<td style="text-align: right;">いずれか必須</td>
+<td><code>api</code> を受け取り、プラグインインスタンスを返す関数です。</td>
+</tr>
+<tr>
+<td><code>constructor(api)</code></td>
+<td>function</td>
+<td style="text-align: right;">推奨</td>
+<td>APIオブジェクトを保持します。</td>
+</tr>
+<tr>
+<td><code>onload()</code></td>
+<td>function or Promise<void></td>
+<td style="text-align: right;">任意</td>
+<td>有効化時に呼ばれます。</td>
+</tr>
+<tr>
+<td><code>onunload()</code></td>
+<td>function or Promise<void></td>
+<td style="text-align: right;">任意</td>
+<td>無効化・削除時に呼ばれます。</td>
+</tr>
+</tbody>
+</table>
+<h2 id="2-api">2. API一覧</h2>
+<table>
+<thead>
+<tr>
+<th>名前</th>
+<th>型</th>
+<th>説明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>api.patch</code></td>
+<td>function</td>
+<td>ゲームオブジェクトのメソッドをラップします。</td>
+</tr>
+<tr>
+<td><code>api.addStyle</code></td>
+<td>function</td>
+<td>プラグイン専用スコープ付きCSSを追加します。</td>
+</tr>
+<tr>
+<td><code>api.storage</code></td>
+<td>object</td>
+<td>プラグイン単位の設定・進行データを保存します。</td>
+</tr>
+<tr>
+<td><code>api.on</code></td>
+<td>function</td>
+<td>ADMLイベントを購読します。</td>
+</tr>
+<tr>
+<td><code>api.onGameLoad</code></td>
+<td>function</td>
+<td>ゲームのロード完了時に処理を実行します。</td>
+</tr>
+<tr>
+<td><code>api.notify</code></td>
+<td>function</td>
+<td>ゲーム画面に通知を表示します。</td>
+</tr>
+<tr>
+<td><code>api.updateUI</code></td>
+<td>function</td>
+<td>ゲームUIの更新を要求します。</td>
+</tr>
+<tr>
+<td><code>api.injectData</code></td>
+<td>function</td>
+<td>公開データオブジェクトへデータを追加・更新します。</td>
+</tr>
+<tr>
+<td><code>api.registerTab</code></td>
+<td>function</td>
+<td>カスタムタブの登録通知を行います。</td>
+</tr>
+<tr>
+<td><code>api.mods</code></td>
+<td>object</td>
+<td>インストール済みMODを参照します。</td>
+</tr>
+<tr>
+<td><code>api.endgame</code></td>
+<td>object</td>
+<td>エンドゲーム用レイヤーとリソースを扱います。</td>
+</tr>
+<tr>
+<td><code>api.github</code></td>
+<td>object</td>
+<td>固定Topic <code>adml-plugin</code> の検索・インストールを行います。</td>
+</tr>
+<tr>
+<td><code>api.forge</code></td>
+<td>object</td>
+<td>派生MODのmanifest作成とZIP出力を行います。</td>
+</tr>
+<tr>
+<td><code>api.i18n</code></td>
+<td>object</td>
+<td>言語パックを登録・有効化します。</td>
+</tr>
+<tr>
+<td><code>api.language</code></td>
+<td>object</td>
+<td><code>api.i18n</code> の簡易エイリアスです。</td>
+</tr>
+<tr>
+<td><code>api.player</code></td>
+<td>getter</td>
+<td>ゲームの <code>window.player</code> を参照します。</td>
+</tr>
+<tr>
+<td><code>api.currency</code></td>
+<td>getter</td>
+<td>ゲームの <code>window.Currency</code> を参照します。</td>
+</tr>
+<tr>
+<td><code>api.db</code></td>
+<td>getter</td>
+<td>ゲームの <code>window.GameDatabase</code> を参照します。</td>
+</tr>
+<tr>
+<td><code>api.dc</code></td>
+<td>getter</td>
+<td>ゲームの <code>window.DC</code> を参照します。</td>
+</tr>
+</tbody>
+</table>
+<h2 id="3-api">3. パッチAPI</h2>
+<h3 id="apipatchtarget-method-wrapper"><code>api.patch(target, method, wrapper)</code></h3>
+<table>
+<thead>
+<tr>
+<th>引数</th>
+<th>型</th>
+<th>説明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>target</code></td>
+<td>object</td>
+<td>メソッドを持つ対象オブジェクトです。</td>
+</tr>
+<tr>
+<td><code>method</code></td>
+<td>string</td>
+<td>差し替えるメソッド名です。</td>
+</tr>
+<tr>
+<td><code>wrapper</code></td>
+<td>function</td>
+<td><code>original</code> と元の引数を受け取るラッパーです。</td>
+</tr>
+</tbody>
+</table>
+<p>戻り値は解除関数です。プラグインが無効化されるとADMLも自動的に解除します。</p>
+<pre><code class="language-js">const stopPatch = api.patch(GameDatabase, &quot;get&quot;, (original, ...args) =&gt; {
+  const result = original(...args);
+  return result;
+});
+
+stopPatch();
+</code></pre>
+<p>元のメソッドの契約を壊す変更や、存在しない対象へのパッチは避けてください。同じメソッドを複数MODが変更する場合は、manifestの依存関係で読み込み順を明示してください。</p>
+<h2 id="4-api">4. スタイルAPI</h2>
+<h3 id="apiaddstylecss"><code>api.addStyle(css)</code></h3>
+<table>
+<thead>
+<tr>
+<th>引数</th>
+<th>型</th>
+<th>戻り値</th>
+<th>説明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>css</code></td>
+<td>string</td>
+<td>HTMLStyleElement</td>
+<td>プラグイン専用スコープを付与して <code>document.head</code> に追加します。</td>
+</tr>
+</tbody>
+</table>
+<pre><code class="language-js">api.addStyle(`
+  .my-panel { color: #d7f9ff; border: 1px solid #4dd0e1; }
+`);
+</code></pre>
+<p><code>body</code> と <code>:root</code> はプラグイン用スコープへ変換されます。グローバルなCSSリセットや他MODの要素を意図せず変更するセレクターは避けてください。</p>
+<h2 id="5-api">5. ストレージAPI</h2>
+<h3 id="apistoragegetkey-apistoragesetkey-value"><code>api.storage.get(key)</code> / <code>api.storage.set(key, value)</code></h3>
+<table>
+<thead>
+<tr>
+<th>メソッド</th>
+<th>引数</th>
+<th>戻り値</th>
+<th>説明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>get(key)</code></td>
+<td><code>key: string</code></td>
+<td><code>any</code> or <code>undefined</code></td>
+<td>現在のプラグイン専用ストレージから値を取得します。</td>
+</tr>
+<tr>
+<td><code>set(key, value)</code></td>
+<td><code>key: string</code>, JSON-compatible</td>
+<td><code>void</code></td>
+<td>値を保存し、ADMLの永続化処理を呼び出します。</td>
+</tr>
+</tbody>
+</table>
+<pre><code class="language-js">const count = Number(api.storage.get(&quot;count&quot;) || 0);
+api.storage.set(&quot;count&quot;, count + 1);
+</code></pre>
+<p>ストレージはプラグインIDごとに分離されます。関数、DOMノード、循環参照、巨大なバイナリなどJSON化できない値は保存しないでください。</p>
+<h2 id="6-ui-api">6. イベント・UI API</h2>
+<h3 id="apionevent-callback"><code>api.on(event, callback)</code></h3>
+<table>
+<thead>
+<tr>
+<th>引数</th>
+<th>型</th>
+<th>説明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>event</code></td>
+<td>string</td>
+<td>ADMLイベント名です。標準イベントには <code>localeChanged</code> があります。</td>
+</tr>
+<tr>
+<td><code>callback</code></td>
+<td>function(data)</td>
+<td>イベント発生時に呼び出されます。</td>
+</tr>
+</tbody>
+</table>
+<p>戻り値はありません。プラグイン無効化時には、そのプラグインが登録したリスナーが自動解除されます。</p>
+<h3 id="apiongameloadcallback"><code>api.onGameLoad(callback)</code></h3>
+<p>DOMがすでにロード済みなら即時に呼び出し、ロード前なら <code>window</code> の <code>load</code> イベントに一度だけ登録します。</p>
+<h3 id="apinotifymessage-apiupdateui"><code>api.notify(message)</code> / <code>api.updateUI()</code></h3>
+<table>
+<thead>
+<tr>
+<th>メソッド</th>
+<th>引数</th>
+<th>説明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>notify(message)</code></td>
+<td><code>message: string</code></td>
+<td>ADML通知トーストを表示します。</td>
+</tr>
+<tr>
+<td><code>updateUI()</code></td>
+<td>なし</td>
+<td>利用可能なゲームUI更新処理を呼び出します。</td>
+</tr>
+</tbody>
+</table>
+<h3 id="apiinjectdatapath-data"><code>api.injectData(path, data)</code></h3>
+<table>
+<thead>
+<tr>
+<th>引数</th>
+<th>型</th>
+<th>戻り値</th>
+<th>説明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>path</code></td>
+<td>string</td>
+<td></td>
+<td><code>GameDatabase.someArray</code> のようなドット区切りのパスです。</td>
+</tr>
+<tr>
+<td><code>data</code></td>
+<td>any</td>
+<td>boolean</td>
+<td>配列には追加し、オブジェクトにはマージします。対象が存在しない場合は <code>false</code> です。</td>
+</tr>
+</tbody>
+</table>
+<pre><code class="language-js">api.injectData(&quot;GameDatabase.tabs&quot;, {
+  id: &quot;my-tab&quot;,
+  label: &quot;My Tab&quot;
+});
+</code></pre>
+<h3 id="apiregistertabconfig"><code>api.registerTab(config)</code></h3>
+<table>
+<thead>
+<tr>
+<th>引数</th>
+<th>型</th>
+<th>戻り値</th>
+<th>説明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>config</code></td>
+<td>object</td>
+<td><code>undefined</code></td>
+<td><code>config.id</code> と <code>config.label</code> を持つタブ構成を登録します。</td>
+</tr>
+</tbody>
+</table>
+<p>現在の統合ローダーでは登録通知を行うアダプターAPIです。実際の画面描画を行うゲーム側のタブデータ追加には、<code>injectData</code> とゲームの公開データ構造を組み合わせてください。</p>
+<h2 id="7-mod-api">7. インストール済みMOD API</h2>
+<h3 id="apimodslist-apimodsgetpluginid"><code>api.mods.list()</code> / <code>api.mods.get(pluginId)</code></h3>
+<table>
+<thead>
+<tr>
+<th>メソッド</th>
+<th>引数</th>
+<th>戻り値</th>
+<th>説明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>list()</code></td>
+<td>なし</td>
+<td>Array<object></td>
+<td>インストール済みMODのmanifest情報一覧を返します。プラグインコードは一覧から除外されます。</td>
+</tr>
+<tr>
+<td><code>get(pluginId)</code></td>
+<td><code>pluginId: string</code></td>
+<td>object or <code>undefined</code></td>
+<td>指定MODのmanifest、ファイル一覧、保存データ、コードを返します。</td>
+</tr>
+</tbody>
+</table>
+<p><code>get()</code> は開発用途向けです。取得したコードを安全と判定するAPIではありません。</p>
+<h2 id="8-api">8. エンドゲームAPI</h2>
+<h3 id="apiendgameregisterlayerconfig"><code>api.endgame.registerLayer(config)</code></h3>
+<table>
+<thead>
+<tr>
+<th>引数</th>
+<th>型</th>
+<th>説明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>config.id</code></td>
+<td>string</td>
+<td>レイヤーIDです。</td>
+</tr>
+<tr>
+<td><code>config.label</code></td>
+<td>string</td>
+<td>UI表示名です。</td>
+</tr>
+<tr>
+<td><code>config.description</code></td>
+<td>string</td>
+<td>説明文です。</td>
+</tr>
+<tr>
+<td><code>config.resource</code></td>
+<td>object</td>
+<td>初期値・表示名などのリソース定義です。</td>
+</tr>
+</tbody>
+</table>
+<h3 id="apiendgamelistlayers-getresourceresourceid-addresourceresourceid-amount"><code>api.endgame.listLayers()</code> / <code>getResource(resourceId)</code> / <code>addResource(resourceId, amount)</code></h3>
+<table>
+<thead>
+<tr>
+<th>メソッド</th>
+<th>引数</th>
+<th>戻り値</th>
+<th>説明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>listLayers()</code></td>
+<td>なし</td>
+<td>Array<object></td>
+<td>登録済みエンドゲームレイヤーを返します。</td>
+</tr>
+<tr>
+<td><code>getResource(resourceId)</code></td>
+<td><code>resourceId: string</code></td>
+<td>object or <code>undefined</code></td>
+<td>リソース定義と現在値を返します。</td>
+</tr>
+<tr>
+<td><code>addResource(resourceId, amount)</code></td>
+<td><code>resourceId: string</code>, <code>amount: number</code></td>
+<td>object or <code>false</code></td>
+<td>カスタムリソースへ量を加算し、永続化します。</td>
+</tr>
+</tbody>
+</table>
+<h2 id="9-githubapi">9. GitHubカタログAPI</h2>
+<h3 id="apigithubsearchtopic"><code>api.github.search(topic)</code></h3>
+<p>GitHub APIを使って、公式Topic <strong><code>adml-plugin</code></strong> のリポジトリを検索します。トピックは変更できません。異なる値を指定するとエラーになります。</p>
+<table>
+<thead>
+<tr>
+<th>引数</th>
+<th>型</th>
+<th>戻り値</th>
+<th>説明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>topic</code></td>
+<td>string</td>
+<td>Promise<object></td>
+<td>省略時は <code>adml-plugin</code> を使います。</td>
+</tr>
+</tbody>
+</table>
+<h3 id="apigithubinstallfullname-apigithubtopicsofficial"><code>api.github.install(fullName)</code> / <code>api.github.topics.official</code></h3>
+<table>
+<thead>
+<tr>
+<th>API</th>
+<th>型</th>
+<th>説明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>install(fullName)</code></td>
+<td>function</td>
+<td><code>owner/repository</code> を受け取り、root.json優先のインストール経路を呼び出します。</td>
+</tr>
+<tr>
+<td><code>topics.official</code></td>
+<td>string</td>
+<td>常に <code>adml-plugin</code> を返します。</td>
+</tr>
+</tbody>
+</table>
+<h2 id="10-mod-forge-api">10. MOD Forge API</h2>
+<table>
+<thead>
+<tr>
+<th>API</th>
+<th>引数</th>
+<th>戻り値</th>
+<th>説明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>api.forge.getParent(pluginId)</code></td>
+<td><code>pluginId: string</code></td>
+<td>object or <code>undefined</code></td>
+<td>派生元にするインストール済みMODを取得します。</td>
+</tr>
+<tr>
+<td><code>api.forge.createManifest(overrides, parentId)</code></td>
+<td>object, <code>string?</code></td>
+<td>object</td>
+<td>既定manifestへ上書き値を適用し、必要なら <code>parent</code> を設定します。</td>
+</tr>
+<tr>
+<td><code>api.forge.exportZip(manifest, code)</code></td>
+<td>object, string</td>
+<td>Promise<Blob></td>
+<td>manifestとplugin.jsをZIPにして返します。</td>
+</tr>
+</tbody>
+</table>
+<pre><code class="language-js">const manifest = api.forge.createManifest({
+  id: &quot;my.derived.mod&quot;,
+  name: &quot;My Derived Mod&quot;,
+  version: &quot;1.0.0&quot;,
+  apiVersion: &quot;v1.1&quot;
+}, &quot;parent.mod.id&quot;);
+const blob = await api.forge.exportZip(manifest, code);
+</code></pre>
+<h2 id="11-api">11. 多言語化API</h2>
+<h3 id="apii18n"><code>api.i18n</code></h3>
+<table>
+<thead>
+<tr>
+<th>API</th>
+<th>引数</th>
+<th>戻り値</th>
+<th>説明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>registerPack(locale, entries)</code></td>
+<td>string, object</td>
+<td>void</td>
+<td>原文と翻訳文の辞書を登録します。</td>
+</tr>
+<tr>
+<td><code>setLocale(locale)</code></td>
+<td>string</td>
+<td>void</td>
+<td>辞書を有効化し、既存・動的DOMを翻訳します。</td>
+</tr>
+<tr>
+<td><code>disable()</code></td>
+<td>なし</td>
+<td>void</td>
+<td>翻訳を解除して原文へ戻します。</td>
+</tr>
+<tr>
+<td><code>getLocale()</code></td>
+<td>なし</td>
+<td>string or <code>null</code></td>
+<td>現在のロケールを返します。</td>
+</tr>
+<tr>
+<td><code>translate(value)</code></td>
+<td>string</td>
+<td>string</td>
+<td>完全一致または部分置換で翻訳します。</td>
+</tr>
+<tr>
+<td><code>replace(root)</code></td>
+<td>Node?</td>
+<td>void</td>
+<td>指定ルートのテキスト・属性を翻訳します。</td>
+</tr>
+<tr>
+<td><code>observe(root)</code></td>
+<td>Node?</td>
+<td>void</td>
+<td>動的に追加されたDOMを監視します。</td>
+</tr>
+</tbody>
+</table>
+<h3 id="apilanguage"><code>api.language</code></h3>
+<p><code>language.register(locale, entries)</code>、<code>enable(locale)</code>、<code>disable()</code>、<code>translate(value)</code> を提供する簡易エイリアスです。</p>
+<h2 id="12-getter">12. ゲーム参照getter</h2>
+<table>
+<thead>
+<tr>
+<th>getter</th>
+<th>実体</th>
+<th>注意</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>api.player</code></td>
+<td><code>window.player</code></td>
+<td>ゲーム進行データです。直接の破壊的変更は避けてください。</td>
+</tr>
+<tr>
+<td><code>api.currency</code></td>
+<td><code>window.Currency</code></td>
+<td>通貨定義への参照です。</td>
+</tr>
+<tr>
+<td><code>api.db</code></td>
+<td><code>window.GameDatabase</code></td>
+<td>ゲームデータベースへの参照です。</td>
+</tr>
+<tr>
+<td><code>api.dc</code></td>
+<td><code>window.DC</code></td>
+<td>ゲーム定数への参照です。</td>
+</tr>
+</tbody>
+</table>
+<h2 id="13-manifestjson-api-v11">13. manifest.json API v1.1</h2>
+<p>API v1.1のmanifestは、APIレベルと依存・互換性メタデータを明示します。</p>
+<pre><code class="language-json">{
+  &quot;manifestVersion&quot;: 1,
+  &quot;id&quot;: &quot;example.mod&quot;,
+  &quot;name&quot;: &quot;Example MOD&quot;,
+  &quot;version&quot;: &quot;1.2.0&quot;,
+  &quot;apiVersion&quot;: &quot;v1.1&quot;,
+  &quot;author&quot;: &quot;Example Developer&quot;,
+  &quot;description&quot;: &quot;API v1.1 sample&quot;,
+  &quot;main&quot;: &quot;plugin.js&quot;,
+  &quot;dependencies&quot;: {
+    &quot;base.mod&quot;: &quot;&gt;=1.0.0 &lt;2.0.0&quot;
+  },
+  &quot;compatibility&quot;: {
+    &quot;minAdmlVersion&quot;: &quot;2.2.0&quot;,
+    &quot;gameVersion&quot;: &quot;&gt;=1.0.0&quot;
+  }
+}
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>フィールド</th>
+<th>型</th>
+<th style="text-align: right;">必須</th>
+<th>説明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>manifestVersion</code></td>
+<td>number</td>
+<td style="text-align: right;">推奨</td>
+<td>manifest形式の世代です。現在は <code>1</code> です。</td>
+</tr>
+<tr>
+<td><code>id</code></td>
+<td>string</td>
+<td style="text-align: right;">必須</td>
+<td>一意なプラグインIDです。</td>
+</tr>
+<tr>
+<td><code>name</code></td>
+<td>string</td>
+<td style="text-align: right;">必須</td>
+<td>表示名です。</td>
+</tr>
+<tr>
+<td><code>version</code></td>
+<td>string</td>
+<td style="text-align: right;">必須</td>
+<td>SemVer形式のプラグインバージョンです。</td>
+</tr>
+<tr>
+<td><code>apiVersion</code></td>
+<td>string</td>
+<td style="text-align: right;">必須</td>
+<td>推奨値は <code>v1.1</code> です。旧 <code>1</code> / <code>v1</code> は互換モードです。</td>
+</tr>
+<tr>
+<td><code>author</code></td>
+<td>string</td>
+<td style="text-align: right;">推奨</td>
+<td>作者名です。</td>
+</tr>
+<tr>
+<td><code>description</code></td>
+<td>string</td>
+<td style="text-align: right;">推奨</td>
+<td>カタログ・検査画面の説明文です。</td>
+</tr>
+<tr>
+<td><code>main</code></td>
+<td>string</td>
+<td style="text-align: right;">推奨</td>
+<td>実行するJSファイルです。既定値は <code>plugin.js</code> です。</td>
+</tr>
+<tr>
+<td><code>dependencies</code></td>
+<td>object</td>
+<td style="text-align: right;">任意</td>
+<td><code>pluginId: versionRange</code> の依存関係マップです。</td>
+</tr>
+<tr>
+<td><code>compatibility</code></td>
+<td>object</td>
+<td style="text-align: right;">任意</td>
+<td>ADML・ゲームバージョンの互換性条件です。</td>
+</tr>
+<tr>
+<td><code>parent</code></td>
+<td>string</td>
+<td style="text-align: right;">任意</td>
+<td>MOD Forgeで作成した派生元IDです。</td>
+</tr>
+<tr>
+<td><code>type</code></td>
+<td>string</td>
+<td style="text-align: right;">任意</td>
+<td><code>language-pack</code>、<code>theme</code>、<code>patch</code>、<code>endgame</code> 等の分類です。</td>
+</tr>
+</tbody>
+</table>
+<p>依存関係と互換性の正式な検証がローダー側で提供されていないバージョンでは、これらは宣言メタデータとして扱われます。プラグイン側で自己検証を行い、ローダーが対応している場合は有効化前の検証結果を尊重してください。循環依存、存在しない依存、互換性不明のゲーム改変は安全側へ倒して無効化します。</p>
+<h2 id="14">14. セーブ・ロード統合</h2>
+<p>ADMLのインストール済みMOD・有効化状態・プラグインストレージは、ゲーム側の標準セーブ統合で扱われます。標準セーブの詳しい形式、インポート警告、ファイル入出力は <a href="SAVE.html"><code>SAVE.md</code></a> を参照してください。</p>
+<h2 id="15-api">15. APIエラーと安全性</h2>
+<table>
+<thead>
+<tr>
+<th>エラー状況</th>
+<th>推奨処理</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>plugin.js</code> がない</td>
+<td>インストールを中止します。</td>
+</tr>
+<tr>
+<td><code>Plugin</code> / <code>createPlugin</code> がない</td>
+<td>有効化を中止します。</td>
+</tr>
+<tr>
+<td>依存MODがない</td>
+<td>依存MODを先に導入するまで有効化しません。</td>
+</tr>
+<tr>
+<td>API・ADML互換性不一致</td>
+<td>有効化せず必要バージョンを表示します。</td>
+</tr>
+<tr>
+<td>GitHub取得が403/404</td>
+<td>root.jsonまたは直接アーカイブ経路へ切り替えます。</td>
+</tr>
+<tr>
+<td>未信頼のコード</td>
+<td><code>INSPECT</code> で確認し、明示的に有効化するまで実行しません。</td>
+</tr>
+</tbody>
+</table>
+<p>プラグインはゲームと同じページ上でJavaScriptを実行します。ADML APIは整理・解除・保存を支援しますが、悪意あるコードを完全なサンドボックスへ隔離するものではありません。安全性の詳細は <a href="SECURITY.html"><code>SECURITY.md</code></a> を参照してください。</p>
+<h2 id="16-apiwindowadml">16. グローバルランタイムAPI（<code>window.adml</code>）</h2>
+<p>ゲームのロード完了後、ローダーインスタンスは <code>window.adml</code> に公開されます。プラグイン作者は原則として <code>constructor(api)</code> のAPIを使用し、ここに記載するランタイム操作は統合UIや開発ツールから呼び出してください。</p>
+<table>
+<thead>
+<tr>
+<th>メソッド</th>
+<th>引数</th>
+<th>戻り値</th>
+<th>説明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>window.adml.init()</code></td>
+<td>なし</td>
+<td><code>Promise&lt;void&gt;</code></td>
+<td>ローダーを初期化し、保存済みMODを復元します。</td>
+</tr>
+<tr>
+<td><code>window.adml.openManager()</code></td>
+<td>なし</td>
+<td><code>void</code></td>
+<td>MOD Managerを開きます。</td>
+</tr>
+<tr>
+<td><code>window.adml.openHelp()</code></td>
+<td>なし</td>
+<td><code>void</code></td>
+<td>ゲーム内の利用ガイドを開きます。</td>
+</tr>
+<tr>
+<td><code>window.adml.openCatalog()</code></td>
+<td>なし</td>
+<td><code>void</code></td>
+<td>GitHub Catalogを開きます。Topicは <code>adml-plugin</code> に固定されています。</td>
+</tr>
+<tr>
+<td><code>window.adml.installFile(file)</code></td>
+<td><code>File</code></td>
+<td><code>Promise&lt;void&gt;</code></td>
+<td>ローカルZIPを読み込んで検査可能な状態でインストールします。</td>
+</tr>
+<tr>
+<td><code>window.adml.installUrl(url)</code></td>
+<td><code>string</code></td>
+<td><code>Promise&lt;void&gt;</code></td>
+<td>URLからZIPまたは配布カタログを取得してインストールします。</td>
+</tr>
+<tr>
+<td><code>window.adml.installZip(buffer, sourceName)</code></td>
+<td><code>ArrayBuffer</code>, <code>Blob</code>, <code>Uint8Array</code></td>
+<td><code>Promise&lt;void&gt;</code></td>
+<td>ZIPデータを展開してmanifestとplugin.jsを登録します。</td>
+</tr>
+<tr>
+<td><code>window.adml.installGithubRepo(fullName)</code></td>
+<td><code>owner/repository</code></td>
+<td><code>Promise&lt;void&gt;</code></td>
+<td>root.jsonを優先してGitHubプラグインを取得します。</td>
+</tr>
+<tr>
+<td><code>window.adml.installGithubSource(fullName, branch)</code></td>
+<td><code>owner/repository</code>, <code>string?</code></td>
+<td><code>Promise&lt;void&gt;</code></td>
+<td>指定ブランチのソースアーカイブを取得します。既定ブランチは <code>main</code> です。</td>
+</tr>
+<tr>
+<td><code>window.adml.load(mod)</code></td>
+<td>インストール済みMOD</td>
+<td><code>Promise&lt;void&gt;</code></td>
+<td>指定MODを実行します。通常はManagerのENABLEから呼び出されます。</td>
+</tr>
+<tr>
+<td><code>window.adml.toggle(id)</code></td>
+<td><code>pluginId: string</code></td>
+<td><code>Promise&lt;void&gt;</code></td>
+<td>MODの有効・無効を切り替えます。</td>
+</tr>
+<tr>
+<td><code>window.adml.unload(id)</code></td>
+<td><code>pluginId: string</code></td>
+<td><code>Promise&lt;void&gt;</code></td>
+<td>MODを停止して登録済みパッチ・スタイル・イベントを解除します。</td>
+</tr>
+<tr>
+<td><code>window.adml.remove(id)</code></td>
+<td><code>pluginId: string</code></td>
+<td><code>void</code></td>
+<td>MODを停止し、インストール済みデータから削除します。</td>
+</tr>
+<tr>
+<td><code>window.adml.openForge()</code></td>
+<td>なし</td>
+<td><code>void</code></td>
+<td>MOD Forgeを開きます。</td>
+</tr>
+<tr>
+<td><code>window.adml.exportForgeZip()</code></td>
+<td>なし</td>
+<td><code>Promise&lt;void&gt;</code></td>
+<td>Forgeの入力内容からZIPを生成してダウンロードします。</td>
+</tr>
+<tr>
+<td><code>window.adml.endgameRegisterLayer(config)</code></td>
+<td><code>object</code></td>
+<td><code>object</code></td>
+<td>エンドゲームレイヤーを登録します。</td>
+</tr>
+<tr>
+<td><code>window.adml.endgameListLayers()</code></td>
+<td>なし</td>
+<td><code>Array&lt;object&gt;</code></td>
+<td>登録済みレイヤーを返します。</td>
+</tr>
+<tr>
+<td><code>window.adml.endgameGetResource(id)</code></td>
+<td><code>resourceId: string</code></td>
+<td><code>object or undefined</code></td>
+<td>カスタムリソースを取得します。</td>
+</tr>
+<tr>
+<td><code>window.adml.endgameAddResource(id, amount)</code></td>
+<td><code>resourceId: string</code>, <code>number</code></td>
+<td><code>object or false</code></td>
+<td>カスタムリソースへ加算します。</td>
+</tr>
+<tr>
+<td><code>window.adml.i18nDisable()</code></td>
+<td>なし</td>
+<td><code>void</code></td>
+<td>内部の言語パックを解除します。</td>
+</tr>
+<tr>
+<td><code>window.adml.i18nTranslate(value)</code></td>
+<td><code>string</code></td>
+<td><code>string</code></td>
+<td>現在の辞書で文字列を翻訳します。</td>
+</tr>
+<tr>
+<td><code>window.adml.i18nReplace(root)</code></td>
+<td><code>Node</code></td>
+<td><code>void</code></td>
+<td>指定ノード配下を翻訳します。</td>
+</tr>
+<tr>
+<td><code>window.adml.i18nObserve(root)</code></td>
+<td><code>Node?</code></td>
+<td><code>void</code></td>
+<td>動的DOMの翻訳監視を開始します。</td>
+</tr>
+</tbody>
+</table>
+<p><code>constructor</code>、<code>read</code>、<code>persist</code>、<code>injectStyles</code>、<code>mountButton</code>、<code>ensureJSZip</code>、<code>renderList</code>、<code>resetForgeTemplate</code>、<code>loadForgeParent</code>、<code>cleanup</code>、<code>emit</code>、<code>toast</code> は実装上の内部処理です。外部MODから直接呼び出すことは推奨しません。</p>
+  </main>
+</body>
+</html>

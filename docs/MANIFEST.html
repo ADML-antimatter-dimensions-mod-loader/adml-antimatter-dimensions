@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Manifest & Distribution - ADML Documentation</title>
+  <style>
+    :root { color-scheme: dark; font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #0b1118; color: #e6edf3; }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: radial-gradient(circle at top right, #142b3b 0, #0b1118 42rem); line-height: 1.7; padding-bottom: 80px; }
+    .nav-bar { background: rgba(18, 31, 42, 0.9); border-bottom: 1px solid #294052; padding: 14px 24px; display: flex; gap: 16px; align-items: center; position: sticky; top: 0; backdrop-filter: blur(8px); z-index: 10; }
+    .nav-bar a { color: #63d7df; text-decoration: none; font-weight: 600; font-size: 0.95rem; }
+    .nav-bar a:hover { text-decoration: underline; }
+    .nav-bar span { color: #435b6c; }
+    main { width: min(920px, calc(100% - 32px)); margin: 40px auto 0; background: rgba(15, 25, 35, 0.85); border: 1px solid #294052; border-radius: 12px; padding: 40px clamp(20px, 5vw, 56px); box-shadow: 0 16px 40px rgba(0,0,0,0.3); }
+    h1, h2, h3, h4 { color: #f8fafc; font-weight: 700; line-height: 1.3; margin-top: 1.8em; margin-bottom: 0.6em; }
+    h1 { font-size: clamp(1.8rem, 4vw, 2.6rem); margin-top: 0; border-bottom: 1px solid #294052; padding-bottom: 16px; }
+    h2 { font-size: 1.45rem; border-bottom: 1px solid #1f3344; padding-bottom: 8px; }
+    h3 { font-size: 1.15rem; }
+    p, ul, ol { color: #cbd5e1; margin: 1em 0; }
+    a { color: #63d7df; text-decoration: underline; text-underline-offset: 3px; }
+    code { background: rgba(30, 48, 64, 0.9); color: #b8f0f2; padding: 0.2em 0.4em; border-radius: 4px; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 0.9em; }
+    pre { background: rgba(10, 18, 25, 0.95); border: 1px solid #294052; border-radius: 8px; padding: 16px; overflow-x: auto; margin: 1.5em 0; }
+    pre code { background: none; color: #e2e8f0; padding: 0; }
+    table { width: 100%; border-collapse: collapse; margin: 1.8em 0; font-size: 0.95rem; display: block; overflow-x: auto; }
+    th, td { border: 1px solid #294052; padding: 10px 14px; text-align: left; }
+    th { background: rgba(25, 43, 58, 0.9); color: #f8fafc; font-weight: 600; }
+    td { background: rgba(15, 25, 35, 0.5); color: #cbd5e1; }
+    blockquote { border-left: 4px solid #63d7df; background: rgba(99, 215, 223, 0.08); margin: 1.5em 0; padding: 12px 20px; border-radius: 0 8px 8px 0; color: #e2e8f0; }
+    blockquote p { margin: 0; color: #e2e8f0; }
+    hr { border: none; border-top: 1px solid #294052; margin: 2.5em 0; }
+  </style>
+</head>
+<body>
+  <div class="nav-bar">
+    <a href="index.html">← ドキュメント一覧</a>
+    <span>/</span>
+    <a href="API.html">API v1.1</a>
+    <span>/</span>
+    <a href="MANIFEST.html">Manifest</a>
+    <span>/</span>
+    <a href="SAVE.html">Save Data</a>
+    <span>/</span>
+    <a href="SECURITY.html">Security</a>
+    <span>/</span>
+    <a href="GUIDE.html">User Guide</a>
+    <span>/</span>
+    <a href="FORGE.html">MOD Forge</a>
+  </div>
+  <main>
+    <h1 id="adml-manifestjson">ADML manifest.json と配布形式</h1>
+<p>この文書では、ADMLプラグインZIPの構成、manifest.jsonの各フィールド、<code>root.json</code> カタログで配布する際の注意点を説明します。APIの呼び出し仕様は <a href="API.html"><code>API.md</code></a>、導入手順は <a href="GUIDE.html"><code>GUIDE.md</code></a> を参照してください。</p>
+<h2 id="zip">ZIPの標準構成</h2>
+<pre><code class="language-text">example-mod.zip
+├── manifest.json
+├── plugin.js
+├── README.md
+└── assets/
+    └── icon.svg
+</code></pre>
+<p><code>manifest.json</code> と <code>plugin.js</code> は必須です。<code>main</code> を変更する場合は、そのファイルがZIP内に存在し、ローダーが解決できる相対パスであることを確認してください。配布ZIPには秘密鍵、アクセストークン、<code>node_modules</code>、ビルド前の不要な作業ファイルを含めないでください。</p>
+<h2 id="manifestjson">manifest.jsonの例</h2>
+<pre><code class="language-json">{
+  &quot;manifestVersion&quot;: 1,
+  &quot;id&quot;: &quot;example.mod&quot;,
+  &quot;name&quot;: &quot;Example MOD&quot;,
+  &quot;version&quot;: &quot;1.2.0&quot;,
+  &quot;apiVersion&quot;: &quot;v1.1&quot;,
+  &quot;author&quot;: &quot;Example Developer&quot;,
+  &quot;description&quot;: &quot;A small ADML API v1.1 example.&quot;,
+  &quot;main&quot;: &quot;plugin.js&quot;,
+  &quot;type&quot;: &quot;patch&quot;,
+  &quot;dependencies&quot;: {
+    &quot;base.mod&quot;: &quot;&gt;=1.0.0 &lt;2.0.0&quot;
+  },
+  &quot;compatibility&quot;: {
+    &quot;minAdmlVersion&quot;: &quot;2.2.0&quot;,
+    &quot;gameVersion&quot;: &quot;&gt;=1.0.0&quot;
+  }
+}
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>フィールド</th>
+<th style="text-align: right;">必須</th>
+<th>型</th>
+<th>説明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>manifestVersion</code></td>
+<td style="text-align: right;">推奨</td>
+<td>number</td>
+<td>manifest形式の世代です。現在は <code>1</code> です。</td>
+</tr>
+<tr>
+<td><code>id</code></td>
+<td style="text-align: right;">必須</td>
+<td>string</td>
+<td>一意なIDです。小文字、数字、<code>.</code>、<code>-</code>、<code>_</code> を推奨します。</td>
+</tr>
+<tr>
+<td><code>name</code></td>
+<td style="text-align: right;">必須</td>
+<td>string</td>
+<td>UI・カタログに表示される名前です。</td>
+</tr>
+<tr>
+<td><code>version</code></td>
+<td style="text-align: right;">必須</td>
+<td>string</td>
+<td>SemVer形式のリリースバージョンです。</td>
+</tr>
+<tr>
+<td><code>apiVersion</code></td>
+<td style="text-align: right;">必須</td>
+<td>string</td>
+<td>API互換レベルです。新規MODは <code>v1.1</code> を指定します。</td>
+</tr>
+<tr>
+<td><code>author</code></td>
+<td style="text-align: right;">推奨</td>
+<td>string</td>
+<td>作者名またはチーム名です。</td>
+</tr>
+<tr>
+<td><code>description</code></td>
+<td style="text-align: right;">推奨</td>
+<td>string</td>
+<td>カタログと検査画面に表示される説明です。</td>
+</tr>
+<tr>
+<td><code>main</code></td>
+<td style="text-align: right;">推奨</td>
+<td>string</td>
+<td>実行ファイルです。既定値は <code>plugin.js</code> です。</td>
+</tr>
+<tr>
+<td><code>type</code></td>
+<td style="text-align: right;">任意</td>
+<td>string</td>
+<td><code>theme</code>、<code>patch</code>、<code>language-pack</code>、<code>endgame</code> などの分類です。</td>
+</tr>
+<tr>
+<td><code>dependencies</code></td>
+<td style="text-align: right;">任意</td>
+<td>object</td>
+<td>依存MODのIDとバージョン範囲です。</td>
+</tr>
+<tr>
+<td><code>compatibility</code></td>
+<td style="text-align: right;">任意</td>
+<td>object</td>
+<td>ADMLとゲーム本体の互換性条件です。</td>
+</tr>
+<tr>
+<td><code>parent</code></td>
+<td style="text-align: right;">任意</td>
+<td>string</td>
+<td>MOD Forgeで作成した派生元MODのIDです。</td>
+</tr>
+</tbody>
+</table>
+<h2 id="dependencies">dependencies</h2>
+<p><code>dependencies</code> は <code>pluginId: versionRange</code> のオブジェクトです。依存MODのID、バージョン範囲、必要なAPIレベルを明示してください。依存先が存在しない場合、循環している場合、またはバージョン範囲を満たさない場合、プラグインは有効化を中止するのが安全です。</p>
+<h2 id="compatibility">compatibility</h2>
+<p><code>compatibility.minAdmlVersion</code> は必要なローダーの最低バージョン、<code>compatibility.gameVersion</code> はゲーム本体の対応範囲を表します。ゲーム本体のバージョン表記が利用できない場合は、対象コミットやリリース名を <code>description</code> に明記してください。</p>
+<h2 id="rootjson">root.json</h2>
+<p>root.jsonは、GitHub APIのレート制限やRelease APIの404を避けるための静的カタログです。ビルド時に最新ZIPと過去バージョンの履歴を追記し、Raw URLまたはGitHub Pagesから取得できるようにします。カタログの各エントリには、少なくともID、表示名、バージョン、説明、ZIPのURL、manifestの要約を含めてください。</p>
+<pre><code class="language-json">{
+  &quot;schemaVersion&quot;: 1,
+  &quot;plugin&quot;: {
+    &quot;id&quot;: &quot;example.mod&quot;,
+    &quot;name&quot;: &quot;Example MOD&quot;,
+    &quot;latest&quot;: &quot;1.2.0&quot;,
+    &quot;description&quot;: &quot;A small ADML plugin.&quot;
+  },
+  &quot;versions&quot;: [
+    {
+      &quot;version&quot;: &quot;1.2.0&quot;,
+      &quot;download&quot;: &quot;./dist/example.mod-1.2.0.zip&quot;,
+      &quot;manifest&quot;: &quot;./dist/example.mod-1.2.0.manifest.json&quot;
+    }
+  ]
+}
+</code></pre>
+<p>同じバージョンを重複登録せず、ZIPとmanifestのパスが実際に取得できることをCIで検証してください。</p>
+  </main>
+</body>
+</html>
