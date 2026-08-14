@@ -26,9 +26,13 @@ ADML is a lightweight, secure plugin loader and integrated development framework
 
 ## Documentation
 
-Comprehensive developer and user guides are available under the `docs/` directory:
+The official documentation hub is available at [`docs/index.html`](./docs/index.html). It links to every maintained guide and should be the first page opened by developers and users.
 
-- [API Reference](./docs/API.md): Complete method signatures, classes, and code examples for core APIs (`patch`, `addStyle`, `registerTab`, `injectData`, `storage`, `github`, `endgame`).
+- [Documentation Portal](./docs/index.html): Index of the API, manifest, security, save, user, and MOD Forge documents.
+- [API v1.1 Reference](./docs/API.md): Complete plugin-facing and runtime API tables, examples, lifecycle hooks, i18n, GitHub Catalog, MOD Forge, endgame, manifest dependencies, and compatibility metadata.
+- [Manifest & Distribution](./docs/MANIFEST.md): ZIP layout, manifest fields, dependencies, compatibility, and root.json catalog rules.
+- [Standard Save & MOD Data](./docs/SAVE.md): Export/Import save integration, MOD storage, enabled state, and import behavior.
+- [Security Guide](./docs/SECURITY.md): Inspect-before-enable rules, embedded code warnings, dependency checks, and recovery guidance.
 - [User Guide & Installation](./docs/GUIDE.md): Step-by-step instructions for installing local ZIPs, understanding security warnings, and browsing the GitHub Catalog.
 - [Mod Forge Guide](./docs/FORGE.md): Guide to creating derivative mods (mods of mods) and exporting custom ZIP packages.
 

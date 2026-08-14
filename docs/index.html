@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ADML Documentation</title>
+  <style>
+    :root { color-scheme: dark; font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #0b1118; color: #e6edf3; }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: radial-gradient(circle at top right, #142b3b 0, #0b1118 42rem); line-height: 1.65; }
+    main { width: min(1080px, calc(100% - 32px)); margin: 0 auto; padding: 56px 0 72px; }
+    header { border-bottom: 1px solid #294052; padding-bottom: 28px; }
+    .eyebrow { color: #63d7df; letter-spacing: .13em; text-transform: uppercase; font-size: .78rem; font-weight: 700; }
+    h1 { margin: 10px 0; font-size: clamp(2rem, 5vw, 3.6rem); line-height: 1.05; color: #f8fafc; }
+    .lead { max-width: 760px; color: #a8bac7; font-size: 1.08rem; }
+    section { margin-top: 36px; }
+    h2 { color: #f8fafc; font-size: 1.35rem; margin-bottom: 15px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; }
+    .card { display: block; min-height: 148px; padding: 20px; border: 1px solid #294052; border-radius: 10px; background: rgba(18, 31, 42, .82); text-decoration: none; color: inherit; transition: transform .18s ease, border-color .18s ease, background .18s ease; }
+    .card:hover, .card:focus-visible { transform: translateY(-3px); border-color: #63d7df; background: #162837; outline: none; }
+    .card strong { display: block; color: #63d7df; font-size: 1.05rem; margin-bottom: 7px; }
+    .card span { color: #a8bac7; font-size: .94rem; }
+    .wide { grid-column: 1 / -1; min-height: auto; }
+    footer { margin-top: 48px; padding-top: 18px; border-top: 1px solid #294052; color: #7f93a1; font-size: .9rem; }
+    code { color: #b8f0f2; }
+    @media (prefers-reduced-motion: reduce) { .card { transition: none; } .card:hover, .card:focus-visible { transform: none; } }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <div class="eyebrow">Antimatter Dimensions Mod Loader</div>
+      <h1>ADML Documentation</h1>
+      <p class="lead">ADMLの公式ドキュメント入口です。API、プラグインの作成、ZIP配布、root.jsonカタログ、標準セーブへのMODデータ統合、安全性を目的別に確認できます。</p>
+    </header>
+
+    <section aria-labelledby="core">
+      <h2 id="core">Core references</h2>
+      <div class="grid">
+        <a class="card wide" href="API.md"><strong>API.md — API v1.1 完全リファレンス</strong><span>プラグインAPI、patch、addStyle、storage、イベント、injectData、mods、endgame、GitHub、Forge、i18n、language、ゲーム参照getter、manifestの依存関係・互換性を掲載しています。</span></a>
+        <a class="card" href="MANIFEST.md"><strong>MANIFEST.md — manifestと配布形式</strong><span>manifest.jsonの全フィールド、ZIP構成、dependencies、compatibility、root.jsonカタログの仕様です。</span></a>
+        <a class="card" href="SECURITY.md"><strong>SECURITY.md — セキュリティガイド</strong><span>第三者コード、検査、明示的な有効化、セーブインポート警告、依存関係の確認方法を説明します。</span></a>
+        <a class="card" href="SAVE.md"><strong>SAVE.md — 標準セーブとMODデータ</strong><span>Export/Import save、ファイル入出力、MOD本体・有効化状態・storageの扱いと復旧手順です。</span></a>
+      </div>
+    </section>
+
+    <section aria-labelledby="guides">
+      <h2 id="guides">Guides</h2>
+      <div class="grid">
+        <a class="card" href="GUIDE.md"><strong>GUIDE.md — ユーザー・導入ガイド</strong><span>ゲームの開始、ローカルZIP、GitHub Catalog、INSPECT、ENABLE、DISABLE、REMOVEの使い方です。</span></a>
+        <a class="card" href="FORGE.md"><strong>FORGE.md — MOD Forgeガイド</strong><span>インストール済みMODを親にして派生MODを編集し、ZIPとして出力する手順です。</span></a>
+        <a class="card" href="../README.md"><strong>README.md — プロジェクト概要</strong><span>ADMLの目的、主要機能、リンク、開発者向けの全体像を確認できます。</span></a>
+      </div>
+    </section>
+
+    <section aria-labelledby="repositories">
+      <h2 id="repositories">Repositories and distribution</h2>
+      <div class="grid">
+        <a class="card" href="https://github.com/ADML-antimatter-dimensions-mod-loader/mod-templet" target="_blank" rel="noopener"><strong>mod-templet — Plugin Builder</strong><span>API v1.1対応プラグインのテンプレート、ビルド、ZIP、GitHub Actions、root.json更新。</span></a>
+        <a class="card" href="https://github.com/ADML-antimatter-dimensions-mod-loader/Japanese-Language-Pack" target="_blank" rel="noopener"><strong>Japanese-Language-Pack</strong><span>日本語パックの辞書、動的DOM翻訳、ビルド成果物の配布リポジトリ。</span></a>
+        <a class="card" href="https://github.com/ADML-antimatter-dimensions-mod-loader/auto-booster" target="_blank" rel="noopener"><strong>auto-booster</strong><span>root.jsonと自動ビルドで配布されるサンプルプラグイン。</span></a>
+        <a class="card" href="https://adml-antimatter-dimensions-mod-loader.github.io/adml-antimatter-dimensions/" target="_blank" rel="noopener"><strong>Playable game</strong><span>ADMLローダーが組み込まれたAntimatter Dimensionsの公開プレイ版。</span></a>
+      </div>
+    </section>
+
+    <footer>APIの実装変更時は、まず <code>docs/API.md</code> と関連するmanifest・サンプルコードを同時に更新してください。</footer>
+  </main>
+</body>
+</html>
