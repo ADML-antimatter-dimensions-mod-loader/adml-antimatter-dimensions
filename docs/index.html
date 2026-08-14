@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>ADML Documentation Hub</title>
+  <title>ADML Documentation Hub (JP / EN)</title>
   <style>
     :root { color-scheme: dark; font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #0b1118; color: #e6edf3; }
     * { box-sizing: border-box; }
@@ -16,63 +16,74 @@
     section { margin-top: 36px; }
     h2 { color: #f8fafc; font-size: 1.35rem; margin-bottom: 15px; }
     .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; }
-    .card { display: block; min-height: 148px; padding: 20px; border: 1px solid #294052; border-radius: 10px; background: rgba(18, 31, 42, .82); text-decoration: none; color: inherit; transition: transform .18s ease, border-color .18s ease, background .18s ease; }
+    .card { display: block; min-height: 140px; padding: 20px; border: 1px solid #294052; border-radius: 10px; background: rgba(18, 31, 42, .82); text-decoration: none; color: inherit; transition: transform .18s ease, border-color .18s ease, background .18s ease; }
     .card:hover, .card:focus-visible { transform: translateY(-3px); border-color: #63d7df; background: #162837; outline: none; }
     .card strong { display: block; color: #63d7df; font-size: 1.05rem; margin-bottom: 7px; }
     .card span { color: #a8bac7; font-size: .94rem; }
     .wide { grid-column: 1 / -1; min-height: auto; }
     footer { margin-top: 48px; padding-top: 18px; border-top: 1px solid #294052; color: #7f93a1; font-size: .9rem; }
     code { color: #b8f0f2; }
-    @media (prefers-reduced-motion: reduce) { .card { transition: none; } .card:hover, .card:focus-visible { transform: none; } }
+    .lang-group { display: flex; gap: 8px; margin-top: 6px; font-size: 0.9rem; font-weight: 600; }
+    .lang-group a { color: #63d7df; text-decoration: underline; }
   </style>
 </head>
 <body>
   <main>
     <header>
       <div class="eyebrow">Antimatter Dimensions Mod Loader</div>
-      <h1>ADML Documentation</h1>
-      <p class="lead">ADMLの公式Webドキュメントポータルです。API v1.0、API v1.1、API比較表、マニフェスト、セーブ統合、セキュリティ、導入手順、MOD Forgeの各ガイドを快適に閲覧できるHTML版を提供しています。</p>
+      <h1>ADML Documentation Hub</h1>
+      <p class="lead">ADMLの公式マルチリンガル・ドキュメントポータルです。API v1.0（レガシー）、API v1.1（現行標準）、バージョン比較表を日本語（JP）および英語（EN）の両方で提供しています。</p>
     </header>
 
     <section aria-labelledby="api-versions">
-      <h2 id="api-versions">API Versions & Comparison</h2>
+      <h2 id="api-versions">API Specifications & Comparison (JP / EN)</h2>
       <div class="grid">
-        <a class="card" href="API-v1.0.html"><strong>API v1.0 (Legacy)</strong><span>初期のZIPプラグインシステムで採用されていた旧バージョンのAPI仕様です。</span></a>
-        <a class="card" href="API-v1.1.html"><strong>API v1.1 (Current)</strong><span>依存関係の自動検証、バージョン互換性、セーブ統合を含む現行の標準API仕様です。</span></a>
-        <a class="card" href="API-compare.html"><strong>API v1.0 vs v1.1 比較表</strong><span>旧API v1.0と現行API v1.1の機能差分や仕様の違いを一目で確認できます。</span></a>
+        <div class="card">
+          <strong>API v1.0 Reference (Legacy)</strong>
+          <span>初期ZIPプラグイン形式のレガシー仕様。</span>
+          <div class="lang-group">
+            <a href="API-v1.0-ja.html">[日本語]</a>
+            <a href="API-v1.0-en.html">[English]</a>
+          </div>
+        </div>
+        <div class="card">
+          <strong>API v1.1 Reference (Current)</strong>
+          <span>依存関係・互換性・セーブ統合を備えた現行標準仕様。</span>
+          <div class="lang-group">
+            <a href="API-v1.1-ja.html">[日本語]</a>
+            <a href="API-v1.1-en.html">[English]</a>
+          </div>
+        </div>
+        <div class="card">
+          <strong>API Version Comparison</strong>
+          <span>v1.0とv1.1の全機能差分マトリクス比較。</span>
+          <div class="lang-group">
+            <a href="API-compare-ja.html">[日本語]</a>
+            <a href="API-compare-en.html">[English]</a>
+          </div>
+        </div>
       </div>
     </section>
 
     <section aria-labelledby="core">
       <h2 id="core">Core references (HTML)</h2>
       <div class="grid">
-        <a class="card wide" href="API.html"><strong>API.html — API v1.1 完全リファレンス</strong><span>プラグインAPI、patch、addStyle、storage、イベント、injectData、mods、endgame、GitHub、Forge、i18n、language、ゲーム参照getterを網羅した詳細版です。</span></a>
-        <a class="card" href="MANIFEST.html"><strong>MANIFEST.html — manifestと配布形式</strong><span>manifest.jsonの全フィールド、ZIP構成、dependencies、compatibility、root.jsonカタログの仕様です。</span></a>
-        <a class="card" href="SECURITY.html"><strong>SECURITY.html — セキュリティガイド</strong><span>第三者コード、検査、明示的な有効化、セーブインポート警告、依存関係の確認方法を説明します。</span></a>
-        <a class="card" href="SAVE.html"><strong>SAVE.html — 標準セーブとMODデータ</strong><span>Export/Import save、ファイル入出力、MOD本体・有効化状態・storageの扱いと復旧手順です。</span></a>
+        <a class="card wide" href="API.html"><strong>API.html — API v1.1 完全リファレンス</strong><span>パッチ、スタイル、ストレージ、イベント、UI、エコシステム、多言語化、ゲームgetterの総まとめ。</span></a>
+        <a class="card" href="MANIFEST.html"><strong>MANIFEST.html — manifestと配布形式</strong><span>manifest.jsonの全フィールド、ZIP構成、dependencies、compatibility。</span></a>
+        <a class="card" href="SECURITY.html"><strong>SECURITY.html — セキュリティガイド</strong><span>第三者コード検査、明示的有効化、インポート警告。</span></a>
+        <a class="card" href="SAVE.html"><strong>SAVE.html — 標準セーブとMODデータ</strong><span>Export/Import saveへのMOD同梱と復元仕様。</span></a>
       </div>
     </section>
 
     <section aria-labelledby="guides">
       <h2 id="guides">Guides (HTML)</h2>
       <div class="grid">
-        <a class="card" href="GUIDE.html"><strong>GUIDE.html — ユーザー・導入ガイド</strong><span>ゲームの開始、ローカルZIP、GitHub Catalog、INSPECT、ENABLE、DISABLE、REMOVEの使い方です。</span></a>
-        <a class="card" href="FORGE.html"><strong>FORGE.html — MOD Forgeガイド</strong><span>インストール済みMODを親にして派生MODを編集し、ZIPとして出力する手順です。</span></a>
-        <a class="card" href="../README.md"><strong>README.md — プロジェクト概要 (Markdown)</strong><span>ADMLの目的、主要機能、リンク、開発者向けの全体像を確認できます。</span></a>
+        <a class="card" href="GUIDE.html"><strong>GUIDE.html — ユーザー・導入ガイド</strong><span>ゲーム開始、ローカルZIP、GitHub Catalogの使い方。</span></a>
+        <a class="card" href="FORGE.html"><strong>FORGE.html — MOD Forgeガイド</strong><span>インストール済みMODからの派生MOD編集・ZIP出力手順。</span></a>
       </div>
     </section>
 
-    <section aria-labelledby="repositories">
-      <h2 id="repositories">Repositories and distribution</h2>
-      <div class="grid">
-        <a class="card" href="https://github.com/ADML-antimatter-dimensions-mod-loader/mod-templet" target="_blank" rel="noopener"><strong>mod-templet — Plugin Builder</strong><span>API v1.1対応プラグインのテンプレート、ビルド、ZIP、GitHub Actions、root.json更新。</span></a>
-        <a class="card" href="https://github.com/ADML-antimatter-dimensions-mod-loader/Japanese-Language-Pack" target="_blank" rel="noopener"><strong>Japanese-Language-Pack</strong><span>日本語パックの辞書、動的DOM翻訳、ビルド成果物の配布リポジトリ。</span></a>
-        <a class="card" href="https://github.com/ADML-antimatter-dimensions-mod-loader/auto-booster" target="_blank" rel="noopener"><strong>auto-booster</strong><span>root.jsonと自動ビルドで配布されるサンプルプラグイン。</span></a>
-        <a class="card" href="https://adml-antimatter-dimensions-mod-loader.github.io/adml-antimatter-dimensions/" target="_blank" rel="noopener"><strong>Playable game</strong><span>ADMLローダーが組み込まれたAntimatter Dimensionsの公開プレイ版。</span></a>
-      </div>
-    </section>
-
-    <footer>APIの実装変更時は、まずドキュメントソースを更新してHTMLを再生成してください。</footer>
+    <footer>ADML API Multilingual Documentation Hub — Supported by Manus AI</footer>
   </main>
 </body>
 </html>

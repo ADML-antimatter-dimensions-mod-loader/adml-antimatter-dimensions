@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ADML API v1.0 完全リファレンス (日本語)</title>
+  <style>
+    :root { color-scheme: dark; font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #0b1118; color: #e6edf3; }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: radial-gradient(circle at top right, #142b3b 0, #0b1118 42rem); line-height: 1.7; padding-bottom: 80px; }
+    .nav-bar { background: rgba(18, 31, 42, 0.9); border-bottom: 1px solid #294052; padding: 14px 24px; display: flex; gap: 12px; align-items: center; position: sticky; top: 0; backdrop-filter: blur(8px); z-index: 10; flex-wrap: wrap; font-size: 0.9rem; }
+    .nav-bar a { color: #63d7df; text-decoration: none; font-weight: 600; }
+    .nav-bar a:hover { text-decoration: underline; }
+    .nav-bar span { color: #435b6c; }
+    main { width: min(960px, calc(100% - 32px)); margin: 40px auto 0; background: rgba(15, 25, 35, 0.85); border: 1px solid #294052; border-radius: 12px; padding: 40px clamp(20px, 5vw, 56px); box-shadow: 0 16px 40px rgba(0,0,0,0.3); }
+    h1, h2, h3 { color: #f8fafc; font-weight: 700; line-height: 1.3; margin-top: 1.8em; margin-bottom: 0.6em; }
+    h1 { font-size: clamp(1.8rem, 4vw, 2.5rem); margin-top: 0; border-bottom: 1px solid #294052; padding-bottom: 16px; }
+    h2 { font-size: 1.4rem; border-bottom: 1px solid #1f3344; padding-bottom: 8px; }
+    p, ul, ol { color: #cbd5e1; margin: 1em 0; }
+    a { color: #63d7df; text-decoration: underline; text-underline-offset: 3px; }
+    code { background: rgba(30, 48, 64, 0.9); color: #b8f0f2; padding: 0.2em 0.4em; border-radius: 4px; font-family: ui-monospace, monospace; font-size: 0.9em; }
+    pre { background: rgba(10, 18, 25, 0.95); border: 1px solid #294052; border-radius: 8px; padding: 16px; overflow-x: auto; margin: 1.5em 0; }
+    table { width: 100%; border-collapse: collapse; margin: 1.8em 0; font-size: 0.95rem; display: block; overflow-x: auto; }
+    th, td { border: 1px solid #294052; padding: 10px 14px; text-align: left; }
+    th { background: rgba(25, 43, 58, 0.9); color: #f8fafc; font-weight: 600; }
+    td { background: rgba(15, 25, 35, 0.5); color: #cbd5e1; }
+    blockquote { border-left: 4px solid #f6ad55; background: rgba(246, 173, 85, 0.08); margin: 1.5em 0; padding: 12px 20px; border-radius: 0 8px 8px 0; color: #e2e8f0; }
+  </style>
+</head>
+<body>
+  <div class="nav-bar">
+    <a href="index.html">← ホーム</a>
+    <span>/</span>
+    <a href="API-v1.0-ja.html">v1.0 (JP)</a>
+    <a href="API-v1.0-en.html">v1.0 (EN)</a>
+    <span>|</span>
+    <a href="API-v1.1-ja.html">v1.1 (JP)</a>
+    <a href="API-v1.1-en.html">v1.1 (EN)</a>
+    <span>|</span>
+    <a href="API-compare-ja.html">比較 (JP)</a>
+    <a href="API-compare-en.html">比較 (EN)</a>
+  </div>
+  <main>
+    <h1>ADML API v1.0 完全リファレンス (Legacy)</h1>
+    <blockquote>
+      <p><strong>レガシー仕様:</strong> API v1.0は、ADML初期リリースにおける基盤API仕様です。単一プラグインのパッチ適用とローカルストレージを提供していましたが、依存関係解決やセーブデータの自動同梱機能はありません。新規開発では <a href="API-v1.1-ja.html">API v1.1</a> の使用を強く推奨します。</p>
+    </blockquote>
+
+    <h2>1. ライフサイクルとプラグイン構造</h2>
+    <p>API v1.0のプラグインは、<code>class Plugin</code> 構造を持ち、<code>constructor(api)</code> を通じてインスタンス化されます。モジュールの読み込み時（<code>onload</code>）とアンロード時（<code>onunload</code>）のシンプルなライフサイクルを持ちます。</p>
+    <pre><code>class Plugin {
+  constructor(api) {
+    this.api = api;
+  }
+  onload() {
+    this.api.notify("API v1.0 プラグインが有効化されました");
+  }
+  onunload() {
+    this.api.notify("API v1.0 プラグインが無効化されました");
+  }
+}</code></pre>
+
+    <h2>2. API v1.0 公開メソッド一覧（全網羅）</h2>
+    <table>
+      <thead>
+        <tr><th>メソッド / プロパティ</th><th>引数型</th><th>説明と戻り値</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><code>api.patch</code></td><td><code>(targetObj, methodName, wrapperFn)</code></td><td>ゲームオブジェクトの指定メソッドをフック・拡張します。</td></tr>
+        <tr><td><code>api.addStyle</code></td><td><code>(cssString)</code></td><td>ページ内にスコープ付きCSSスタイルシートを動的に注入します。</td></tr>
+        <tr><td><code>api.storage.get</code></td><td><code>(key)</code></td><td>プラグイン専用のローカルストレージから指定キーの値を取得します。</td></tr>
+        <tr><td><code>api.storage.set</code></td><td><code>(key, value)</code></td><td>プラグイン専用のローカルストレージへ値を保存します。</td></tr>
+        <tr><td><code>api.notify</code></td><td><code>(messageString)</code></td><td>ゲーム画面上に通知トーストポップアップを表示します。</td></tr>
+        <tr><td><code>api.updateUI</code></td><td><code>()</code></td><td>ゲームのUI再描画および更新イベントを手動でトリガーします。</td></tr>
+      </tbody>
+    </table>
+
+    <h2>3. Manifest.json (v1.0) の仕様</h2>
+    <p>API v1.0で記述する <code>manifest.json</code> の必須フィールド構成です。</p>
+    <pre><code>{
+  "manifestVersion": 1,
+  "id": "my.legacy.plugin",
+  "name": "Legacy Sample Mod",
+  "version": "1.0.0",
+  "apiVersion": "1",
+  "author": "Developer",
+  "description": "API v1.0 compatible legacy plugin",
+  "main": "plugin.js"
+}</code></pre>
+  </main>
+</body>
+</html>

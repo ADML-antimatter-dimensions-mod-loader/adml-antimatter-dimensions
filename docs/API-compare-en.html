@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ADML API Comparison (v1.0 vs v1.1) - English</title>
+  <style>
+    :root { color-scheme: dark; font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #0b1118; color: #e6edf3; }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: radial-gradient(circle at top right, #142b3b 0, #0b1118 42rem); line-height: 1.7; padding-bottom: 80px; }
+    .nav-bar { background: rgba(18, 31, 42, 0.9); border-bottom: 1px solid #294052; padding: 14px 24px; display: flex; gap: 12px; align-items: center; position: sticky; top: 0; backdrop-filter: blur(8px); z-index: 10; flex-wrap: wrap; font-size: 0.9rem; }
+    .nav-bar a { color: #63d7df; text-decoration: none; font-weight: 600; }
+    .nav-bar a:hover { text-decoration: underline; }
+    .nav-bar span { color: #435b6c; }
+    main { width: min(960px, calc(100% - 32px)); margin: 40px auto 0; background: rgba(15, 25, 35, 0.85); border: 1px solid #294052; border-radius: 12px; padding: 40px clamp(20px, 5vw, 56px); box-shadow: 0 16px 40px rgba(0,0,0,0.3); }
+    h1, h2, h3 { color: #f8fafc; font-weight: 700; line-height: 1.3; margin-top: 1.8em; margin-bottom: 0.6em; }
+    h1 { font-size: clamp(1.8rem, 4vw, 2.5rem); margin-top: 0; border-bottom: 1px solid #294052; padding-bottom: 16px; }
+    h2 { font-size: 1.4rem; border-bottom: 1px solid #1f3344; padding-bottom: 8px; }
+    p, ul, ol { color: #cbd5e1; margin: 1em 0; }
+    a { color: #63d7df; text-decoration: underline; text-underline-offset: 3px; }
+    code { background: rgba(30, 48, 64, 0.9); color: #b8f0f2; padding: 0.2em 0.4em; border-radius: 4px; font-family: ui-monospace, monospace; font-size: 0.9em; }
+    table { width: 100%; border-collapse: collapse; margin: 1.8em 0; font-size: 0.95rem; display: block; overflow-x: auto; }
+    th, td { border: 1px solid #294052; padding: 10px 14px; text-align: left; }
+    th { background: rgba(25, 43, 58, 0.9); color: #f8fafc; font-weight: 600; }
+    td { background: rgba(15, 25, 35, 0.5); color: #cbd5e1; }
+    blockquote { border-left: 4px solid #63d7df; background: rgba(99, 215, 223, 0.08); margin: 1.5em 0; padding: 12px 20px; border-radius: 0 8px 8px 0; color: #e2e8f0; }
+  </style>
+</head>
+<body>
+  <div class="nav-bar">
+    <a href="index.html">← Home</a>
+    <span>/</span>
+    <a href="API-v1.0-ja.html">v1.0 (JP)</a>
+    <a href="API-v1.0-en.html">v1.0 (EN)</a>
+    <span>|</span>
+    <a href="API-v1.1-ja.html">v1.1 (JP)</a>
+    <a href="API-v1.1-en.html">v1.1 (EN)</a>
+    <span>|</span>
+    <a href="API-compare-ja.html">Compare (JP)</a>
+    <a href="API-compare-en.html">Compare (EN)</a>
+  </div>
+  <main>
+    <h1>ADML API Version Comparison (v1.0 vs v1.1)</h1>
+    <p>Detailed feature and specification comparison between the legacy <strong>API v1.0</strong> and the current standard <strong>API v1.1</strong>.</p>
+
+    <table>
+      <thead>
+        <tr><th>Feature / Item</th><th>API v1.0 (Legacy)</th><th>API v1.1 (Current Standard)</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>apiVersion value</strong></td><td><code>"1"</code> or <code>"v1"</code></td><td><code>"v1.1"</code></td></tr>
+        <tr><td><strong>Dependency Management</strong></td><td>None</td><td>Supported (automatic validation & load ordering)</td></tr>
+        <tr><td><strong>Compatibility Checks</strong></td><td>None</td><td>Supported (ADML & game version constraints)</td></tr>
+        <tr><td><strong>Save Integration</strong></td><td>Separate buttons/management</td><td>Auto-bundled into standard Export/Import save</td></tr>
+        <tr><td><strong>Endgame Layers</strong></td><td>None</td><td>Custom layers via <code>api.endgame</code></td></tr>
+        <tr><td><strong>MOD Forge</strong></td><td>None</td><td>Derivative ZIP generation via <code>api.forge</code></td></tr>
+        <tr><td><strong>GitHub Integration</strong></td><td>Basic search only</td><td>Fixed topic <code>adml-plugin</code> & root.json catalog</td></tr>
+        <tr><td><strong>Internationalization (i18n)</strong></td><td>Custom implementation</td><td>Dynamic DOM observation & dictionaries via <code>api.i18n</code></td></tr>
+        <tr><td><strong>Import Security Warning</strong></td><td>None</td><td>Prompt warning users about untrusted code execution</td></tr>
+      </tbody>
+    </table>
+  </main>
+</body>
+</html>

@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ADML API v1.1 完全リファレンス (日本語)</title>
+  <style>
+    :root { color-scheme: dark; font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #0b1118; color: #e6edf3; }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: radial-gradient(circle at top right, #142b3b 0, #0b1118 42rem); line-height: 1.7; padding-bottom: 80px; }
+    .nav-bar { background: rgba(18, 31, 42, 0.9); border-bottom: 1px solid #294052; padding: 14px 24px; display: flex; gap: 12px; align-items: center; position: sticky; top: 0; backdrop-filter: blur(8px); z-index: 10; flex-wrap: wrap; font-size: 0.9rem; }
+    .nav-bar a { color: #63d7df; text-decoration: none; font-weight: 600; }
+    .nav-bar a:hover { text-decoration: underline; }
+    .nav-bar span { color: #435b6c; }
+    main { width: min(960px, calc(100% - 32px)); margin: 40px auto 0; background: rgba(15, 25, 35, 0.85); border: 1px solid #294052; border-radius: 12px; padding: 40px clamp(20px, 5vw, 56px); box-shadow: 0 16px 40px rgba(0,0,0,0.3); }
+    h1, h2, h3 { color: #f8fafc; font-weight: 700; line-height: 1.3; margin-top: 1.8em; margin-bottom: 0.6em; }
+    h1 { font-size: clamp(1.8rem, 4vw, 2.5rem); margin-top: 0; border-bottom: 1px solid #294052; padding-bottom: 16px; }
+    h2 { font-size: 1.4rem; border-bottom: 1px solid #1f3344; padding-bottom: 8px; }
+    p, ul, ol { color: #cbd5e1; margin: 1em 0; }
+    a { color: #63d7df; text-decoration: underline; text-underline-offset: 3px; }
+    code { background: rgba(30, 48, 64, 0.9); color: #b8f0f2; padding: 0.2em 0.4em; border-radius: 4px; font-family: ui-monospace, monospace; font-size: 0.9em; }
+    pre { background: rgba(10, 18, 25, 0.95); border: 1px solid #294052; border-radius: 8px; padding: 16px; overflow-x: auto; margin: 1.5em 0; }
+    table { width: 100%; border-collapse: collapse; margin: 1.8em 0; font-size: 0.95rem; display: block; overflow-x: auto; }
+    th, td { border: 1px solid #294052; padding: 10px 14px; text-align: left; }
+    th { background: rgba(25, 43, 58, 0.9); color: #f8fafc; font-weight: 600; }
+    td { background: rgba(15, 25, 35, 0.5); color: #cbd5e1; }
+    blockquote { border-left: 4px solid #63d7df; background: rgba(99, 215, 223, 0.08); margin: 1.5em 0; padding: 12px 20px; border-radius: 0 8px 8px 0; color: #e2e8f0; }
+  </style>
+</head>
+<body>
+  <div class="nav-bar">
+    <a href="index.html">← ホーム</a>
+    <span>/</span>
+    <a href="API-v1.0-ja.html">v1.0 (JP)</a>
+    <a href="API-v1.0-en.html">v1.0 (EN)</a>
+    <span>|</span>
+    <a href="API-v1.1-ja.html">v1.1 (JP)</a>
+    <a href="API-v1.1-en.html">v1.1 (EN)</a>
+    <span>|</span>
+    <a href="API-compare-ja.html">比較 (JP)</a>
+    <a href="API-compare-en.html">比較 (EN)</a>
+  </div>
+  <main>
+    <h1>ADML API v1.1 完全リファレンス (現行標準)</h1>
+    <blockquote>
+      <p><strong>標準仕様:</strong> API v1.1は、依存関係管理（<code>dependencies</code>）、互換性検証（<code>compatibility</code>）、標準セーブへのMODデータ一括同梱、エンドゲーム拡張、MOD Forge、多言語化（i18n）を網羅した強力なプラットフォームAPIです。</p>
+    </blockquote>
+
+    <h2>1. ライフサイクルとグローバルランタイム</h2>
+    <p>API v1.1では、インスタンスベースのプラグインに加え、ブラウザコンソールや外部ツールから安全に操作できるグローバルランタイム <code>window.adml</code> が提供されます。</p>
+    <pre><code>// 実行中のMOD一覧やストレージ状態にアクセス
+console.log(window.adml.mods);
+console.log(window.adml.enabled);</code></pre>
+
+    <h2>2. API v1.1 公開メソッド・プロパティ一覧（全網羅）</h2>
+    <table>
+      <thead>
+        <tr><th>カテゴリ</th><th>API / メソッド</th><th>引数と詳細仕様</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>コアパッチ</td><td><code>api.patch</code></td><td><code>(target, method, wrapper)</code> - ゲームの関数・メソッドを安全にラップします。</td></tr>
+        <tr><td>スタイル</td><td><code>api.addStyle</code></td><td><code>(cssText)</code> - スコープ付きCSSをDOMに挿入します。</td></tr>
+        <tr><td>ストレージ</td><td><code>api.storage.get / set</code></td><td><code>(key)</code> / <code>(key, value)</code> - プラグイン専用データの永続化。</td></tr>
+        <tr><td>イベント</td><td><code>api.on</code> / <code>api.onGameLoad</code></td><td><code>(event, cb)</code> / <code>(cb)</code> - ゲームイベントおよびロード完了フック。</td></tr>
+        <tr><td>UI & タブ</td><td><code>api.notify</code>, <code>api.updateUI</code>, <code>api.injectData</code>, <code>api.registerTab</code></td><td>画面通知、UI更新、カスタムタブ・データ注入を行います。</td></tr>
+        <tr><td>エコシステム</td><td><code>api.mods</code>, <code>api.endgame</code>, <code>api.github</code>, <code>api.forge</code></td><td>インストール済みMOD操作、エンドゲーム拡張、GitHub連携、Forge。</td></tr>
+        <tr><td>多言語化</td><td><code>api.i18n</code>, <code>api.language</code></td><td>辞書登録、動的DOM監視、アクティブ言語の切り替え。</td></tr>
+        <tr><td>ゲーム参照</td><td><code>api.player</code>, <code>api.currency</code>, <code>api.db</code>, <code>api.dc</code></td><td>ゲーム内データや通貨・データベースへの読み取り専用getter。</td></tr>
+      </tbody>
+    </table>
+
+    <h2>3. Manifest.json (v1.1) と依存関係・互換性</h2>
+    <p>API v1.1対応のプラグインマニフェストでは、他のMODへの依存関係や互換性を明示できます。</p>
+    <pre><code>{
+  "manifestVersion": 1,
+  "id": "advanced.mod",
+  "name": "Advanced Feature Mod",
+  "version": "1.1.0",
+  "apiVersion": "v1.1",
+  "author": "Modder",
+  "description": "API v1.1 advanced plugin with dependency checks",
+  "main": "plugin.js",
+  "dependencies": {
+    "japanese-language-pack": ">=1.0.0"
+  },
+  "compatibility": {
+    "minAdmlVersion": "2.2.0",
+    "gameVersion": ">=1.0.0"
+  }
+}</code></pre>
+  </main>
+</body>
+</html>
